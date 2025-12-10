@@ -74,146 +74,172 @@
 
         h1 { 
             font-family: 'Fredoka One', cursive; 
-            font-size: clamp(2rem, 5vw, 4rem); 
+            font-size: clamp(2.5rem, 6vw, 4.5rem); 
             color: var(--sand); 
-            text-shadow: 2px 2px 0px #000; 
+            text-shadow: 3px 3px 0px #000; 
             margin-bottom: 0.5rem; 
         }
         
         p { 
-            font-size: clamp(0.9rem, 3vw, 1.1rem); 
-            margin-bottom: 1.5rem; 
+            font-size: clamp(1rem, 3.5vw, 1.3rem); 
+            margin-bottom: 2rem; 
             max-width: 600px; 
-            line-height: 1.4; 
+            line-height: 1.5; 
             color: #e2e8f0;
         }
 
         .btn-group {
             display: flex;
-            gap: 10px;
+            gap: 15px;
             flex-wrap: wrap;
             justify-content: center;
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .btn {
             color: white;
             border: none;
-            padding: 15px 25px;
-            font-size: 1.1rem;
+            padding: 18px 30px; 
+            font-size: 1.2rem;
             font-family: 'Fredoka One', cursive;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            box-shadow: 0 6px 0 rgba(0,0,0,0.3);
             transition: transform 0.1s;
-            min-width: 100px;
+            min-width: 110px;
+            pointer-events: auto; 
         }
-        .btn:active { transform: translateY(4px); box-shadow: none; }
+        .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
         
         .btn-easy { background: #22c55e; }
         .btn-med { background: #f59e0b; }
         .btn-hard { background: #ef4444; }
-        .btn-alt { background: var(--ocean-light); margin-top: 10px; }
+        .btn-alt { background: var(--ocean-light); margin-top: 15px; }
+        .btn-gold { background: #FFD700; color: #000; box-shadow: 0 6px 0 #B8860B; }
 
         /* --- HUD --- */
         #hud {
             position: absolute;
-            top: env(safe-area-inset-top, 10px);
-            left: 10px;
-            right: 10px;
+            top: max(15px, env(safe-area-inset-top)); 
+            left: 15px;
+            right: 15px;
             display: flex;
             justify-content: space-between;
-            pointer-events: none;
+            align-items: flex-start;
+            pointer-events: none; 
             z-index: 5;
         }
+        
+        .hud-left { display: flex; gap: 10px; }
+        
         .stat-box {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 8px 14px;
-            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.6); 
+            padding: 10px 16px;
+            border-radius: 25px;
             color: white;
             font-weight: bold;
-            font-size: 0.9rem;
-            border: 1px solid rgba(255,255,255,0.2);
+            font-size: 1rem;
+            border: 2px solid rgba(255,255,255,0.2);
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
+
+        .menu-btn {
+            pointer-events: auto;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+        .menu-btn:active { background: rgba(255,255,255,0.4); }
 
         #timer-box {
             position: absolute;
-            top: 60px;
+            top: max(70px, calc(env(safe-area-inset-top) + 60px));
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(255, 215, 0, 0.8);
-            color: black;
-            padding: 5px 15px;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #0f172a;
+            padding: 8px 20px;
             border-radius: 20px;
             font-weight: bold;
+            font-size: 1.2rem;
             font-family: 'Fredoka One', cursive;
             display: none;
             z-index: 5;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+            border: 2px solid white;
         }
 
         /* --- Quiz Modal --- */
-        #quiz-screen { background: rgba(0,0,0,0.95); }
+        #quiz-screen { background: rgba(0,0,0,0.92); backdrop-filter: blur(5px); }
         
         #quiz-modal {
             background: white;
             color: #1e293b;
-            width: 95%;
+            width: 90%;
             max-width: 450px;
-            border-radius: 20px;
+            border-radius: 25px;
             padding: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            border: 4px solid var(--danger);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+            border: 5px solid var(--danger);
             position: relative;
         }
 
         .quiz-question { 
-            font-size: 1.1rem; 
+            font-size: 1.2rem; 
             font-weight: bold; 
-            margin-bottom: 1rem;
+            margin-bottom: 1.2rem;
             min-height: 3em;
             display: flex;
             align-items: center;
             justify-content: center;
+            line-height: 1.4;
         }
         
         .quiz-options { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
-            gap: 10px; 
+            gap: 12px; 
         }
         
         .quiz-btn {
-            background: #f1f5f9;
+            background: #f8fafc;
             border: 2px solid #cbd5e1;
-            padding: 12px 5px;
-            border-radius: 10px;
-            font-size: 0.9rem;
+            padding: 15px 5px;
+            border-radius: 12px;
+            font-size: 0.95rem;
             cursor: pointer;
             text-align: center;
             font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 50px;
+            min-height: 60px;
             touch-action: manipulation; 
+            transition: background 0.2s;
         }
-        .quiz-btn:active { background: #cbd5e1; }
-        .quiz-feedback { margin-top: 15px; font-weight: bold; height: 20px; color: var(--danger); }
+        .quiz-btn:active { background: #e2e8f0; transform: scale(0.98); }
+        .quiz-feedback { margin-top: 15px; font-weight: bold; height: 25px; font-size: 1.1rem; color: var(--danger); }
 
         /* --- Victory Message --- */
         #victory-message {
             position: absolute;
-            top: 30%;
+            top: 40%;
             left: 50%;
             transform: translate(-50%, -50%);
             font-family: 'Fredoka One', cursive;
-            font-size: 2.5rem;
-            color: #fde047; /* Sand/Gold */
-            text-shadow: 0px 4px 10px rgba(0,0,0,0.5);
+            font-size: 3rem;
+            color: #fde047;
+            text-shadow: 0px 4px 15px rgba(0,0,0,0.6);
             text-align: center;
             pointer-events: none;
             z-index: 20;
@@ -231,22 +257,23 @@
         
         #mobile-hint {
             position: absolute;
-            bottom: 20%;
+            bottom: 25%;
             width: 100%;
             text-align: center;
-            color: rgba(255,255,255,0.8);
-            font-size: 1.2rem;
-            font-weight: bold;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.3rem;
+            font-family: 'Fredoka One', cursive;
             pointer-events: none;
-            text-shadow: 1px 1px 2px black;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             animation: pulse 1.5s infinite;
         }
         
-        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+        @keyframes pulse { 0% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.1); } 100% { opacity: 0.5; transform: scale(1); } }
 
         @media (max-width: 380px) {
             .quiz-options { grid-template-columns: 1fr; }
-            h1 { font-size: 1.8rem; }
+            h1 { font-size: 2rem; }
+            .stat-box { padding: 8px 10px; font-size: 0.8rem; }
         }
     </style>
 </head>
@@ -257,12 +284,16 @@
         <div id="tap-zone"></div>
 
         <div id="hud" class="hidden">
-            <div class="stat-box">❤️ <span id="lives">3</span></div>
-            <div class="stat-box">🧊 <span id="iceberg-hp">100%</span></div>
-            <div class="stat-box">⭐ <span id="score">0</span></div>
+            <div class="hud-left">
+                <div class="stat-box">❤️ <span id="lives">3</span></div>
+                <div class="stat-box">🧊 <span id="iceberg-hp">100%</span></div>
+                <div class="stat-box">⭐ <span id="score">0</span></div>
+            </div>
+            <!-- HUD Menu Button -->
+            <button class="menu-btn" ontouchstart="showStartScreen()" onclick="showStartScreen()">🏠 MENU</button>
         </div>
         
-        <div id="timer-box">BONUS: 60s</div>
+        <div id="timer-box">BONUS: 10s</div>
 
         <div id="victory-message">OCEAN CLEANED!<br>BONUS MODE! 🌟</div>
 
@@ -270,9 +301,9 @@
             <h1>Ripple's Rescue</h1>
             <p>
                 Swim safely, Ripple! 🐢<br>
-                Recycle trash to <strong>Destroy the Iceberg!</strong><br>
+                Answer 25 Questions to Win!<br>
             </p>
-            <p style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 10px;">Select Difficulty:</p>
+            <p style="font-size: 1rem; color: #94a3b8; margin-bottom: 15px; font-weight: bold;">SELECT DIFFICULTY:</p>
             <div class="btn-group">
                 <button class="btn btn-easy" ontouchstart="initGame('easy')" onclick="initGame('easy')">EASY</button>
                 <button class="btn btn-med" ontouchstart="initGame('medium')" onclick="initGame('medium')">MEDIUM</button>
@@ -282,8 +313,8 @@
 
         <div id="quiz-screen" class="ui-screen hidden">
             <div id="quiz-modal">
-                <h2 style="color:var(--danger); font-size:1.3rem; margin-bottom:0.5rem;">⚠️ TRASH HIT! ⚠️</h2>
-                <p style="font-size:0.85rem; margin-bottom:1rem; color: #64748b;">Answer correctly to recycle it!</p>
+                <h2 style="color:var(--danger); font-size:1.5rem; margin-bottom:0.5rem; font-family:'Fredoka One', cursive;">⚠️ TRASH HIT! ⚠️</h2>
+                <p style="font-size:0.9rem; margin-bottom:1rem; color: #64748b;">Answer correctly to recycle it!</p>
                 <div id="question-text" class="quiz-question">...</div>
                 <div id="options-container" class="quiz-options"></div>
                 <div id="quiz-feedback" class="quiz-feedback"></div>
@@ -292,12 +323,24 @@
 
         <div id="game-over-screen" class="ui-screen hidden">
             <h1 id="end-title">Game Over</h1>
-            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; width: 80%;">
+            <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 20px; margin-bottom: 25px; width: 85%; border: 2px solid rgba(255,255,255,0.2);">
                 <h2>Score: <span id="final-score">0</span></h2>
-                <p id="iceberg-status" style="margin-bottom: 5px; color: #bae6fd;">Iceberg Remaining: 100%</p>
-                <p id="rank-text" style="font-weight:bold; color:var(--sand); margin-bottom:0;">Rank: Litterbug</p>
+                <p id="iceberg-status" style="margin-bottom: 5px; color: #bae6fd; font-weight:bold;">Iceberg Remaining: 100%</p>
+                <p id="rank-text" style="font-weight:bold; color:var(--sand); margin-bottom:0; font-size: 1.2rem;">Rank: Litterbug</p>
             </div>
-            <button class="btn btn-alt" ontouchstart="showStartScreen()" onclick="showStartScreen()">MAIN MENU</button>
+            <button class="btn btn-alt" style="z-index: 50; position: relative;" ontouchstart="showStartScreen()" onclick="showStartScreen()">🏠 MAIN MENU</button>
+        </div>
+
+        <!-- VICTORY SCREEN -->
+        <div id="victory-screen" class="ui-screen hidden">
+            <h1 style="color: #FFD700; font-size: 3.5rem;">🎉 VICTORY! 🎉</h1>
+            <p>You answered all 25 questions correctly!</p>
+            <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+                <h2 style="color: #22d3ee;">Ripple is Safe!</h2>
+            </div>
+            <button class="btn btn-gold" ontouchstart="startEndlessMode()" onclick="startEndlessMode()">🏊 SWIM FOREVER</button>
+            <br>
+            <button class="btn btn-alt" style="margin-top: 10px;" ontouchstart="showStartScreen()" onclick="showStartScreen()">🏠 MAIN MENU</button>
         </div>
 
         <div id="mobile-hint" class="hidden">TAP TO SWIM 👆</div>
@@ -326,8 +369,13 @@
         let isPaused = false;
         let isGameOver = false;
         let isBonusMode = false;
-        let bonusEndTime = 0; // Timestamp for when bonus ends
+        let isEndlessMode = false;
+        let bonusEndTime = 0; 
         let currentDiff = 'medium';
+        
+        let questionQueue = [];
+        let correctAnswersCount = 0;
+        let bonusRoundsPlayed = 0;
 
         function resize() {
             canvas.width = window.innerWidth;
@@ -345,103 +393,111 @@
         const SPRITES = { t: "🐢", j: "🪼", b: "🗑️", s: "🥤", bo: "🍾", p: "🧴", star: "⭐", fish: "🐠" };
 
         const QUIZ_DB = [
-    // --- EASY LEVEL (30 Questions) ---
-    { diff: 'easy', q: "What animal is Ripple?", a: ["Sea Turtle", "Shark", "Dolphin", "Starfish"], c: 0 },
-    { diff: 'easy', q: "What is the main character's name?", a: ["Elara", "Sarah", "Jenny", "Ripple"], c: 0 },
-    { diff: 'easy', q: "What color was Elara's reusable bottle?", a: ["Blue", "Red", "Green", "Yellow"], c: 0 },
-    { diff: 'easy', q: "What does a floating plastic bag look like to a turtle?", a: ["A Jellyfish", "A Rock", "A Boat", "A Shoe"], c: 0 },
-    { diff: 'easy', q: "Where does Elara like to walk?", a: ["The Beach", "The Mall", "The Forest", "The City"], c: 0 },
-    { diff: 'easy', q: "What is the 'Plastic Iceberg' made of?", a: ["Trash", "Ice", "Snow", "Sand"], c: 0 },
-    { diff: 'easy', q: "Is plastic good for the ocean?", a: ["No", "Yes", "Maybe", "Sometimes"], c: 0 },
-    { diff: 'easy', q: "What should you put in the recycling bin?", a: ["Plastic Bottle", "Apple Core", "Dirty Tissue", "Pizza Slice"], c: 0 },
-    { diff: 'easy', q: "What is better than a plastic straw?", a: ["Bamboo Straw", "Two Plastic Straws", "Rubber Straw", "Styrofoam"], c: 0 },
-    { diff: 'easy', q: "What happens if a fish eats plastic?", a: ["It gets sick", "It gets strong", "It grows bigger", "Nothing"], c: 0 },
-    { diff: 'easy', q: "Who helped Elara clean the beach?", a: ["Mr. Lin", "The Mayor", "Her Cat", "A Pirate"], c: 0 },
-    { diff: 'easy', q: "What is the name of the bay in the story?", a: ["Sapphire Bay", "Emerald Bay", "Ruby Bay", "Diamond Bay"], c: 0 },
-    { diff: 'easy', q: "Which of these is a 'Need'?", a: ["Water", "Candy", "Toys", "Video Games"], c: 0 },
-    { diff: 'easy', q: "Which of these is a 'Want'?", a: ["Plastic Straw", "Air", "Shelter", "Food"], c: 0 },
-    { diff: 'easy', q: "What do we call picking up trash on the shore?", a: ["Beach Cleanup", "Swimming", "Sunbathing", "Surfing"], c: 0 },
-    { diff: 'easy', q: "What should you use instead of a plastic bag?", a: ["Cloth Bag", "Nothing", "Another Plastic Bag", "A Box"], c: 0 },
-    { diff: 'easy', q: "Where do fish live?", a: ["The Ocean", "Trees", "The Sky", "The Desert"], c: 0 },
-    { diff: 'easy', q: "Which item is usually made of plastic?", a: ["Water Bottle", "Apple", "Rock", "Leaf"], c: 0 },
-    { diff: 'easy', q: "Can we reuse glass bottles?", a: ["Yes", "No", "Never", "Only once"], c: 0 },
-    { diff: 'easy', q: "What covers most of the Earth?", a: ["Water", "Land", "Ice", "Forests"], c: 0 },
-    { diff: 'easy', q: "What symbol represents recycling?", a: ["Three Arrows", "A Heart", "A Star", "A Skull"], c: 0 },
-    { diff: 'easy', q: "Littering means...", a: ["Throwing trash on ground", "Cleaning up", "Recycling", "Sleeping"], c: 0 },
-    { diff: 'easy', q: "Who is Ripple's friend in the story?", a: ["Elara", "A Shark", "A Crab", "A Bird"], c: 0 },
-    { diff: 'easy', q: "How did Ripple feel when he ate plastic?", a: ["Weak", "Happy", "Strong", "Fast"], c: 0 },
-    { diff: 'easy', q: "What shines in the sky above the ocean?", a: ["The Sun", "A Lamp", "A Fire", "A Flashlight"], c: 0 },
-    { diff: 'easy', q: "Clean water is...", a: ["Clear", "Dirty", "Green", "Black"], c: 0 },
-    { diff: 'easy', q: "We should protect the ocean for the...", a: ["Animals", "Cars", "Robots", "Aliens"], c: 0 },
-    { diff: 'easy', q: "Paper is made from...", a: ["Trees", "Plastic", "Rocks", "Sand"], c: 0 },
-    { diff: 'easy', q: "Glass is made from...", a: ["Sand", "Plastic", "Wood", "Metal"], c: 0 },
-    { diff: 'easy', q: "Elara wants the ocean to be...", a: ["Plastic-Free", "Dirty", "Empty", "Hot"], c: 0 },
+            // EASY (30)
+            { diff: 'easy', q: "What animal is Ripple?", a: ["Sea Turtle", "Shark", "Dolphin", "Starfish"], c: 0 },
+            { diff: 'easy', q: "What is the main character's name?", a: ["Elara", "Sarah", "Jenny", "Ripple"], c: 0 },
+            { diff: 'easy', q: "What color was Elara's reusable bottle?", a: ["Blue", "Red", "Green", "Yellow"], c: 0 },
+            { diff: 'easy', q: "What does a floating plastic bag look like to a turtle?", a: ["A Jellyfish", "A Rock", "A Boat", "A Shoe"], c: 0 },
+            { diff: 'easy', q: "Where does Elara like to walk?", a: ["The Beach", "The Mall", "The Forest", "The City"], c: 0 },
+            { diff: 'easy', q: "What is the 'Plastic Iceberg' made of?", a: ["Trash", "Ice", "Snow", "Sand"], c: 0 },
+            { diff: 'easy', q: "Is plastic good for the ocean?", a: ["No", "Yes", "Maybe", "Sometimes"], c: 0 },
+            { diff: 'easy', q: "What should you put in the recycling bin?", a: ["Plastic Bottle", "Apple Core", "Dirty Tissue", "Pizza Slice"], c: 0 },
+            { diff: 'easy', q: "What is better than a plastic straw?", a: ["Bamboo Straw", "Two Plastic Straws", "Rubber Straw", "Styrofoam"], c: 0 },
+            { diff: 'easy', q: "What happens if a fish eats plastic?", a: ["It gets sick", "It gets strong", "It grows bigger", "Nothing"], c: 0 },
+            { diff: 'easy', q: "Who helped Elara clean the beach?", a: ["Mr. Lin", "The Mayor", "Her Cat", "A Pirate"], c: 0 },
+            { diff: 'easy', q: "What is the name of the bay in the story?", a: ["Sapphire Bay", "Emerald Bay", "Ruby Bay", "Diamond Bay"], c: 0 },
+            { diff: 'easy', q: "Which of these is a 'Need'?", a: ["Water", "Candy", "Toys", "Video Games"], c: 0 },
+            { diff: 'easy', q: "Which of these is a 'Want'?", a: ["Plastic Straw", "Air", "Shelter", "Food"], c: 0 },
+            { diff: 'easy', q: "What do we call picking up trash on the shore?", a: ["Beach Cleanup", "Swimming", "Sunbathing", "Surfing"], c: 0 },
+            { diff: 'easy', q: "What should you use instead of a plastic bag?", a: ["Cloth Bag", "Nothing", "Another Plastic Bag", "A Box"], c: 0 },
+            { diff: 'easy', q: "Where do fish live?", a: ["The Ocean", "Trees", "The Sky", "The Desert"], c: 0 },
+            { diff: 'easy', q: "Which item is usually made of plastic?", a: ["Water Bottle", "Apple", "Rock", "Leaf"], c: 0 },
+            { diff: 'easy', q: "Can we reuse glass bottles?", a: ["Yes", "No", "Never", "Only once"], c: 0 },
+            { diff: 'easy', q: "What covers most of the Earth?", a: ["Water", "Land", "Ice", "Forests"], c: 0 },
+            { diff: 'easy', q: "What symbol represents recycling?", a: ["Three Arrows", "A Heart", "A Star", "A Skull"], c: 0 },
+            { diff: 'easy', q: "Littering means...", a: ["Throwing trash on ground", "Cleaning up", "Recycling", "Sleeping"], c: 0 },
+            { diff: 'easy', q: "Who is Ripple's friend in the story?", a: ["Elara", "A Shark", "A Crab", "A Bird"], c: 0 },
+            { diff: 'easy', q: "How did Ripple feel when he ate plastic?", a: ["Weak", "Happy", "Strong", "Fast"], c: 0 },
+            { diff: 'easy', q: "What shines in the sky above the ocean?", a: ["The Sun", "A Lamp", "A Fire", "A Flashlight"], c: 0 },
+            { diff: 'easy', q: "Clean water is...", a: ["Clear", "Dirty", "Green", "Black"], c: 0 },
+            { diff: 'easy', q: "We should protect the ocean for the...", a: ["Animals", "Cars", "Robots", "Aliens"], c: 0 },
+            { diff: 'easy', q: "Paper is made from...", a: ["Trees", "Plastic", "Rocks", "Sand"], c: 0 },
+            { diff: 'easy', q: "Glass is made from...", a: ["Sand", "Plastic", "Wood", "Metal"], c: 0 },
+            { diff: 'easy', q: "Elara wants the ocean to be...", a: ["Plastic-Free", "Dirty", "Empty", "Hot"], c: 0 },
 
-    // --- MEDIUM LEVEL (30 Questions) ---
-    { diff: 'medium', q: "What are 'Microplastics'?", a: ["Tiny plastic pieces", "Big bottles", "Plastic bags", "Toy cars"], c: 0 },
-    { diff: 'medium', q: "How are microplastics formed?", a: ["Sun/waves break plastic", "Fish make them", "They grow", "They melt"], c: 0 },
-    { diff: 'medium', q: "Why is the 'Plastic Iceberg' dangerous?", a: ["Hides trash underwater", "It's cold", "It's sharp", "It moves fast"], c: 0 },
-    { diff: 'medium', q: "What does 'Sustainable' mean?", a: ["Good for the planet", "Expensive", "Made of plastic", "Fast to make"], c: 0 },
-    { diff: 'medium', q: "Which is NOT a sustainable alternative?", a: ["Styrofoam", "Glass", "Bamboo", "Stainless Steel"], c: 0 },
-    { diff: 'medium', q: "Mr. Lin told Elara: 'It starts with...'", a: ["One bottle", "A million dollars", "A big ship", "The government"], c: 0 },
-    { diff: 'medium', q: "What is the problem with single-use plastic?", a: ["Used once, lasts forever", "Too heavy", "Breaks easily", "Expensive"], c: 0 },
-    { diff: 'medium', q: "Where does plastic go when thrown away?", a: ["Landfills or Oceans", "Disappears", "Space", "The Sun"], c: 0 },
-    { diff: 'medium', q: "Which animal eats jellyfish?", a: ["Sea Turtle", "Lion", "Eagle", "Cow"], c: 0 },
-    { diff: 'medium', q: "What did Elara encourage friends to use?", a: ["Paper bags", "More plastic", "Glass straws", "Nothing"], c: 0 },
-    { diff: 'medium', q: "Plastic is made from...", a: ["Oil/Petroleum", "Plants", "Rocks", "Cotton"], c: 0 },
-    { diff: 'medium', q: "Which decomposes fastest?", a: ["Banana Peel", "Plastic Bottle", "Glass Jar", "Aluminum Can"], c: 0 },
-    { diff: 'medium', q: " 'Reduction' means...", a: ["Using less", "Using more", "Buying new things", "Burning trash"], c: 0 },
-    { diff: 'medium', q: "A reusable bag is usually made of...", a: ["Canvas/Cotton", "Thin Plastic", "Paper", "Glass"], c: 0 },
-    { diff: 'medium', q: "What happens to plastic in the sun?", a: ["Becomes brittle/breaks", "It grows", "Turns into water", "It freezes"], c: 0 },
-    { diff: 'medium', q: "Why don't we need plastic straws?", a: ["We can drink without them", "They are heavy", "They are expensive", "They are too big"], c: 0 },
-    { diff: 'medium', q: "What is 'Packaging'?", a: ["Wrapper around product", "Product inside", "Price tag", "Receipt"], c: 0 },
-    { diff: 'medium', q: "Which of these is a 'natural' material?", a: ["Wood", "Polyester", "Nylon", "Plastic"], c: 0 },
-    { diff: 'medium', q: "When shopping, choose items with...", a: ["Less packaging", "More colors", "Plastic boxes", "Heavy wrappers"], c: 0 },
-    { diff: 'medium', q: "Ripple the turtle lived near a...", a: ["Reef", "Cave", "Shipwreck", "Volcano"], c: 0 },
-    { diff: 'medium', q: "What did Elara make to help the ocean?", a: ["Posters", "A Net", "A Boat", "A Statue"], c: 0 },
-    { diff: 'medium', q: "True or False: Plastic never fully goes away.", a: ["True (becomes microplastic)", "False (vanishes)", "False (fish eat it)", "True (turns to rock)"], c: 0 },
-    { diff: 'medium', q: "A 'Pasta Straw' is good because...", a: ["It is biodegradable", "It tastes like candy", "It never breaks", "It is plastic"], c: 0 },
-    { diff: 'medium', q: "Excessive packaging is an example of...", a: ["Waste/Want", "Need", "Law", "Benefit"], c: 0 },
-    { diff: 'medium', q: "What is a 'Consumer'?", a: ["Someone who buys", "Someone who sells", "Someone who recycles", "Someone who swims"], c: 0 },
-    { diff: 'medium', q: "Which bag is best for the environment?", a: ["Reusable Tote", "Single-use plastic", "Paper bag", "Double plastic"], c: 0 },
-    { diff: 'medium', q: "What enters the food chain via small fish?", a: ["Microplastics", "Seaweed", "Sand", "Air"], c: 0 },
-    { diff: 'medium', q: "'Bobbing on the surface' means...", a: ["Floating up and down", "Sinking", "Flying", "Swimming fast"], c: 0 },
-    { diff: 'medium', q: "To 'Decompose' means to...", a: ["Break down naturally", "Burn up", "Freeze", "Grow"], c: 0 },
-    { diff: 'medium', q: "Elara's story says hope is stronger than...", a: ["Plastic", "Metal", "Stone", "Wind"], c: 0 },
+            // MEDIUM (30)
+            { diff: 'medium', q: "What are 'Microplastics'?", a: ["Tiny plastic pieces", "Big bottles", "Plastic bags", "Toy cars"], c: 0 },
+            { diff: 'medium', q: "How are microplastics formed?", a: ["Sun/waves break plastic", "Fish make them", "They grow", "They melt"], c: 0 },
+            { diff: 'medium', q: "Why is the 'Plastic Iceberg' dangerous?", a: ["Hides trash underwater", "It's cold", "It's sharp", "It moves fast"], c: 0 },
+            { diff: 'medium', q: "What does 'Sustainable' mean?", a: ["Good for the planet", "Expensive", "Made of plastic", "Fast to make"], c: 0 },
+            { diff: 'medium', q: "Which is NOT a sustainable alternative?", a: ["Styrofoam", "Glass", "Bamboo", "Stainless Steel"], c: 0 },
+            { diff: 'medium', q: "Mr. Lin told Elara: 'It starts with...'", a: ["One bottle", "A million dollars", "A big ship", "The government"], c: 0 },
+            { diff: 'medium', q: "What is the problem with single-use plastic?", a: ["Used once, lasts forever", "Too heavy", "Breaks easily", "Expensive"], c: 0 },
+            { diff: 'medium', q: "Where does plastic go when thrown away?", a: ["Landfills or Oceans", "Disappears", "Space", "The Sun"], c: 0 },
+            { diff: 'medium', q: "Which animal eats jellyfish?", a: ["Sea Turtle", "Lion", "Eagle", "Cow"], c: 0 },
+            { diff: 'medium', q: "What did Elara encourage friends to use?", a: ["Paper bags", "More plastic", "Glass straws", "Nothing"], c: 0 },
+            { diff: 'medium', q: "Plastic is made from...", a: ["Oil/Petroleum", "Plants", "Rocks", "Cotton"], c: 0 },
+            { diff: 'medium', q: "Which decomposes fastest?", a: ["Banana Peel", "Plastic Bottle", "Glass Jar", "Aluminum Can"], c: 0 },
+            { diff: 'medium', q: " 'Reduction' means...", a: ["Using less", "Using more", "Buying new things", "Burning trash"], c: 0 },
+            { diff: 'medium', q: "A reusable bag is usually made of...", a: ["Canvas/Cotton", "Thin Plastic", "Paper", "Glass"], c: 0 },
+            { diff: 'medium', q: "What happens to plastic in the sun?", a: ["Becomes brittle/breaks", "It grows", "Turns into water", "It freezes"], c: 0 },
+            { diff: 'medium', q: "Why don't we need plastic straws?", a: ["We can drink without them", "They are heavy", "They are expensive", "They are too big"], c: 0 },
+            { diff: 'medium', q: "What is 'Packaging'?", a: ["Wrapper around product", "Product inside", "Price tag", "Receipt"], c: 0 },
+            { diff: 'medium', q: "Which of these is a 'natural' material?", a: ["Wood", "Polyester", "Nylon", "Plastic"], c: 0 },
+            { diff: 'medium', q: "When shopping, choose items with...", a: ["Less packaging", "More colors", "Plastic boxes", "Heavy wrappers"], c: 0 },
+            { diff: 'medium', q: "Ripple the turtle lived near a...", a: ["Reef", "Cave", "Shipwreck", "Volcano"], c: 0 },
+            { diff: 'medium', q: "What did Elara make to help the ocean?", a: ["Posters", "A Net", "A Boat", "A Statue"], c: 0 },
+            { diff: 'medium', q: "True or False: Plastic never fully goes away.", a: ["True (becomes microplastic)", "False (vanishes)", "False (fish eat it)", "True (turns to rock)"], c: 0 },
+            { diff: 'medium', q: "A 'Pasta Straw' is good because...", a: ["It is biodegradable", "It tastes like candy", "It never breaks", "It is plastic"], c: 0 },
+            { diff: 'medium', q: "Excessive packaging is an example of...", a: ["Waste/Want", "Need", "Law", "Benefit"], c: 0 },
+            { diff: 'medium', q: "What is a 'Consumer'?", a: ["Someone who buys", "Someone who sells", "Someone who recycles", "Someone who swims"], c: 0 },
+            { diff: 'medium', q: "Which bag is best for the environment?", a: ["Reusable Tote", "Single-use plastic", "Paper bag", "Double plastic"], c: 0 },
+            { diff: 'medium', q: "What enters the food chain via small fish?", a: ["Microplastics", "Seaweed", "Sand", "Air"], c: 0 },
+            { diff: 'medium', q: "'Bobbing on the surface' means...", a: ["Floating up and down", "Sinking", "Flying", "Swimming fast"], c: 0 },
+            { diff: 'medium', q: "To 'Decompose' means to...", a: ["Break down naturally", "Burn up", "Freeze", "Grow"], c: 0 },
+            { diff: 'medium', q: "Elara's story says hope is stronger than...", a: ["Plastic", "Metal", "Stone", "Wind"], c: 0 },
 
-    // --- HARD LEVEL (30 Questions) ---
-    { diff: 'hard', q: "How many pieces of plastic are in the ocean?", a: ["5.25 Trillion", "1 Billion", "500 Million", "100 Thousand"], c: 0 },
-    { diff: 'hard', q: "How many seabirds die from plastic yearly?", a: ["More than 1 Million", "100 Thousand", "50 Million", "500"], c: 0 },
-    { diff: 'hard', q: "What % of baby turtles have plastic in them?", a: ["100%", "50%", "10%", "25%"], c: 0 },
-    { diff: 'hard', q: "How many plastic bags are used every minute?", a: ["1 Million", "1 Thousand", "500", "100"], c: 0 },
-    { diff: 'hard', q: "How long does a plastic bag take to decompose?", a: ["20-1000 Years", "1 Week", "1 Month", "1 Year"], c: 0 },
-    { diff: 'hard', q: "Avg time a plastic bag is used before trash?", a: ["12 Minutes", "1 Hour", "1 Day", "1 Week"], c: 0 },
-    { diff: 'hard', q: "How long does a plastic straw take to decompose?", a: ["200 Years", "10 Years", "50 Years", "5 Years"], c: 0 },
-    { diff: 'hard', q: "How long for a plastic bottle to decompose?", a: ["450 Years", "100 Years", "50 Years", "1000 Years"], c: 0 },
-    { diff: 'hard', q: "Which material lasts longest in nature?", a: ["Styrofoam", "Cardboard", "Cotton", "Wood"], c: 0 },
-    { diff: 'hard', q: "The 'Plastic Iceberg' metaphor means...", a: ["Pollution is hidden", "Trash freezes", "It is white", "It floats north"], c: 0 },
-    { diff: 'hard', q: "What is the Great Pacific Garbage Patch?", a: ["Vortex of trash", "Landfill", "Recycling center", "Island of tires"], c: 0 },
-    { diff: 'hard', q: "Which toxin is often found in plastics?", a: ["BPA", "Vitamin C", "Calcium", "Iron"], c: 0 },
-    { diff: 'hard', q: "What is 'Ghost Gear'?", a: ["Abandoned fishing nets", "A scary costume", "A boat engine", "Invisible plastic"], c: 0 },
-    { diff: 'hard', q: "Why are microplastics dangerous to humans?", a: ["We eat fish that ate them", "They cut us", "They smell bad", "They are heavy"], c: 0 },
-    { diff: 'hard', q: "Which country bans plastic bags (example)?", a: ["Rwanda/Kenya", "Mars", "Atlantis", "No one"], c: 0 },
-    { diff: 'hard', q: "Silicone is an alternative to...", a: ["Plastic", "Glass", "Metal", "Paper"], c: 0 },
-    { diff: 'hard', q: "Aluminum foil can be recycled...", a: ["Infinitely", "Twice", "Never", "Once"], c: 0 },
-    { diff: 'hard', q: "Ripple confused plastic bags for...", a: ["Jellyfish", "Squid", "Plankton", "Algae"], c: 0 },
-    { diff: 'hard', q: "In the slides, what fruit had plastic wrap?", a: ["Banana/Kiwi", "Apple", "Orange", "Grape"], c: 0 },
-    { diff: 'hard', q: "Which of these is 'Single-Use' plastic?", a: ["Coffee Stirrer", "Tupperware", "Lego", "Laptop case"], c: 0 },
-    { diff: 'hard', q: "What is the 5R rule?", a: ["Refuse, Reduce, Reuse...", "Run, Rest, Read...", "Red, Redder...", "Random Rules"], c: 0 },
-    { diff: 'hard', q: "Bio-plastics are made from...", a: ["Corn or Plants", "Oil", "Coal", "Sand"], c: 0 },
-    { diff: 'hard', q: "Which creates more carbon footprint?", a: ["Plastic Water Bottle", "Tap Water", "Rain Water", "River Water"], c: 0 },
-    { diff: 'hard', q: "How many tons of plastic enter ocean yearly?", a: ["8-10 Million Tons", "100 Tons", "1 Ton", "500 Tons"], c: 0 },
-    { diff: 'hard', q: "'Photodegradation' is when...", a: ["Sunlight breaks plastic", "Cameras take photos", "Plants grow", "Plastic burns"], c: 0 },
-    { diff: 'hard', q: "What CANNOT go in normal recycling bins?", a: ["Plastic Bags", "Milk Jugs", "Soda Bottles", "Shampoo Bottles"], c: 0 },
-    { diff: 'hard', q: "Mr. Lin: 'Stop the plastic...'", a: ["Before it gets here", "After it sinks", "When it's cheap", "Tomorrow"], c: 0 },
-    { diff: 'hard', q: "What does 'Zero Waste' mean?", a: ["Creating no trash", "Wasting everything", "Having zero money", "Eating zero food"], c: 0 },
-    { diff: 'hard', q: "Polyethylene is a name for...", a: ["Plastic", "Glass", "Paper", "Wood"], c: 0 },
-    { diff: 'hard', q: "Elara stood on a _____ to see the iceberg.", a: ["Rocky Pier", "Sandy Dune", "Wooden Boat", "Tall Tree"], c: 0 }
-];
+            // HARD (30)
+            { diff: 'hard', q: "How many pieces of plastic are in the ocean?", a: ["5.25 Trillion", "1 Billion", "500 Million", "100 Thousand"], c: 0 },
+            { diff: 'hard', q: "How many seabirds die from plastic yearly?", a: ["More than 1 Million", "100 Thousand", "50 Million", "500"], c: 0 },
+            { diff: 'hard', q: "What % of baby turtles have plastic in them?", a: ["100%", "50%", "10%", "25%"], c: 0 },
+            { diff: 'hard', q: "How many plastic bags are used every minute?", a: ["1 Million", "1 Thousand", "500", "100"], c: 0 },
+            { diff: 'hard', q: "How long does a plastic bag take to decompose?", a: ["20-1000 Years", "1 Week", "1 Month", "1 Year"], c: 0 },
+            { diff: 'hard', q: "Avg time a plastic bag is used before trash?", a: ["12 Minutes", "1 Hour", "1 Day", "1 Week"], c: 0 },
+            { diff: 'hard', q: "How long does a plastic straw take to decompose?", a: ["200 Years", "10 Years", "50 Years", "5 Years"], c: 0 },
+            { diff: 'hard', q: "How long for a plastic bottle to decompose?", a: ["450 Years", "100 Years", "50 Years", "1000 Years"], c: 0 },
+            { diff: 'hard', q: "Which material lasts longest in nature?", a: ["Styrofoam", "Cardboard", "Cotton", "Wood"], c: 0 },
+            { diff: 'hard', q: "The 'Plastic Iceberg' metaphor means...", a: ["Pollution is hidden", "Trash freezes", "It is white", "It floats north"], c: 0 },
+            { diff: 'hard', q: "What is the Great Pacific Garbage Patch?", a: ["Vortex of trash", "Landfill", "Recycling center", "Island of tires"], c: 0 },
+            { diff: 'hard', q: "Which toxin is often found in plastics?", a: ["BPA", "Vitamin C", "Calcium", "Iron"], c: 0 },
+            { diff: 'hard', q: "What is 'Ghost Gear'?", a: ["Abandoned fishing nets", "A scary costume", "A boat engine", "Invisible plastic"], c: 0 },
+            { diff: 'hard', q: "Why are microplastics dangerous to humans?", a: ["We eat fish that ate them", "They cut us", "They smell bad", "They are heavy"], c: 0 },
+            { diff: 'hard', q: "Which country bans plastic bags (example)?", a: ["Rwanda/Kenya", "Mars", "Atlantis", "No one"], c: 0 },
+            { diff: 'hard', q: "Silicone is an alternative to...", a: ["Plastic", "Glass", "Metal", "Paper"], c: 0 },
+            { diff: 'hard', q: "Aluminum foil can be recycled...", a: ["Infinitely", "Twice", "Never", "Once"], c: 0 },
+            { diff: 'hard', q: "Ripple confused plastic bags for...", a: ["Jellyfish", "Squid", "Plankton", "Algae"], c: 0 },
+            { diff: 'hard', q: "In the slides, what fruit had plastic wrap?", a: ["Banana/Kiwi", "Apple", "Orange", "Grape"], c: 0 },
+            { diff: 'hard', q: "Which of these is 'Single-Use' plastic?", a: ["Coffee Stirrer", "Tupperware", "Lego", "Laptop case"], c: 0 },
+            { diff: 'hard', q: "What is the 5R rule?", a: ["Refuse, Reduce, Reuse...", "Run, Rest, Read...", "Red, Redder...", "Random Rules"], c: 0 },
+            { diff: 'hard', q: "Bio-plastics are made from...", a: ["Corn or Plants", "Oil", "Coal", "Sand"], c: 0 },
+            { diff: 'hard', q: "Which creates more carbon footprint?", a: ["Plastic Water Bottle", "Tap Water", "Rain Water", "River Water"], c: 0 },
+            { diff: 'hard', q: "How many tons of plastic enter ocean yearly?", a: ["8-10 Million Tons", "100 Tons", "1 Ton", "500 Tons"], c: 0 },
+            { diff: 'hard', q: "'Photodegradation' is when...", a: ["Sunlight breaks plastic", "Cameras take photos", "Plants grow", "Plastic burns"], c: 0 },
+            { diff: 'hard', q: "What CANNOT go in normal recycling bins?", a: ["Plastic Bags", "Milk Jugs", "Soda Bottles", "Shampoo Bottles"], c: 0 },
+            { diff: 'hard', q: "Mr. Lin: 'Stop the plastic...'", a: ["Before it gets here", "After it sinks", "When it's cheap", "Tomorrow"], c: 0 },
+            { diff: 'hard', q: "What does 'Zero Waste' mean?", a: ["Creating no trash", "Wasting everything", "Having zero money", "Eating zero food"], c: 0 },
+            { diff: 'hard', q: "Polyethylene is a name for...", a: ["Plastic", "Glass", "Paper", "Wood"], c: 0 },
+            { diff: 'hard', q: "Elara stood on a _____ to see the iceberg.", a: ["Rocky Pier", "Sandy Dune", "Wooden Boat", "Tall Tree"], c: 0 }
+        ];
 
+        function getQuestionsForGame(difficulty) {
+            const pool = QUIZ_DB.filter(q => q.diff === difficulty);
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+            return pool.slice(0, 25);
+        }
 
         function playTone(type) {
             if (!audioCtx) return;
@@ -506,12 +562,9 @@
                 let angle = Math.min(Math.max(this.dy * 3, -30), 30);
                 ctx.rotate(angle * Math.PI / 180);
                 
-                // FORCE NORMAL FONT FOR COLOR EMOJIS ON IOS
                 ctx.font = "normal 50px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
-                
-                // Outline logic preserved but font fixed
                 ctx.lineWidth = 3;
                 ctx.strokeStyle = "rgba(0,0,0,0.3)";
                 ctx.strokeText(SPRITES.t, 0, 0);
@@ -558,7 +611,6 @@
             draw() {
                 let bob = Math.sin(Date.now() / 200) * 5;
                 ctx.save();
-                // FORCE NORMAL FONT FOR COLOR EMOJIS ON IOS
                 ctx.font = "normal 40px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
@@ -576,7 +628,7 @@
 
         function initGame(difficulty) {
             initAudio();
-            if (document.getElementById('hud').classList.contains('hidden') === false) return;
+            if (document.getElementById('hud').classList.contains('hidden') === false && !isGameOver) return;
 
             currentDiff = difficulty;
             gameSpeed = SETTINGS[difficulty].speed;
@@ -586,12 +638,18 @@
             frames = 0;
             obstacles = [];
             isBonusMode = false;
+            isEndlessMode = false;
             player = new Turtle();
             isPaused = false;
             isGameOver = false;
+            
+            questionQueue = getQuestionsForGame(difficulty);
+            correctAnswersCount = 0;
+            bonusRoundsPlayed = 0;
 
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('victory-screen').classList.add('hidden');
             document.getElementById('hud').classList.remove('hidden');
             document.getElementById('mobile-hint').classList.remove('hidden');
             document.getElementById('timer-box').style.display = 'none';
@@ -604,15 +662,18 @@
         }
 
         function showStartScreen() {
+            isGameOver = true;
             document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('victory-screen').classList.add('hidden');
             document.getElementById('hud').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.add('hidden');
             document.getElementById('start-screen').classList.remove('hidden');
         }
 
         function triggerBonusMode() {
             isBonusMode = true;
-            lives = 3; 
-            bonusEndTime = Date.now() + 60000; // 60 Seconds
+            bonusRoundsPlayed++;
+            bonusEndTime = Date.now() + 10000; 
             document.getElementById('timer-box').style.display = 'block';
             
             const msg = document.getElementById('victory-message');
@@ -623,8 +684,15 @@
         }
 
         function endBonusMode() {
+            if (bonusRoundsPlayed >= 5 && !isEndlessMode) {
+                triggerGrandVictory();
+                return;
+            }
+
             isBonusMode = false;
-            icebergSize = 30; // Trash Returns
+            icebergSize = 100; 
+            correctAnswersCount = 0; 
+            
             document.getElementById('timer-box').style.display = 'none';
             
             const msg = document.getElementById('victory-message');
@@ -633,19 +701,36 @@
             msg.style.opacity = 1;
             setTimeout(() => msg.style.opacity = 0, 3000);
         }
+        
+        function startEndlessMode() {
+            isEndlessMode = true;
+            isBonusMode = false;
+            isGameOver = false;
+            isPaused = false;
+            icebergSize = 100;
+            
+            document.getElementById('victory-screen').classList.add('hidden');
+            document.getElementById('hud').classList.remove('hidden');
+            animate();
+        }
+
+        function triggerGrandVictory() {
+            isGameOver = true;
+            isPaused = true;
+            document.getElementById('victory-screen').classList.remove('hidden');
+            document.getElementById('hud').classList.add('hidden');
+        }
 
         function animate() {
             if (isPaused || isGameOver) return;
             
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // --- DRAW BACKGROUND ---
             let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
             if (isBonusMode) {
                 grad.addColorStop(0, "#22d3ee"); 
                 grad.addColorStop(1, "#0891b2");
                 
-                // Timer Logic
                 let remaining = Math.ceil((bonusEndTime - Date.now()) / 1000);
                 document.getElementById('timer-box').innerText = "BONUS: " + remaining + "s";
                 if (remaining <= 0) {
@@ -658,7 +743,6 @@
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // --- DRAW ICEBERG ---
             if (!isBonusMode && icebergSize > 0) {
                 ctx.save();
                 ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
@@ -709,6 +793,7 @@
         }
 
         function handleTap(e) {
+            if (e.target.tagName === 'BUTTON') return;
             if (e.cancelable) e.preventDefault();
             if (!isPaused && !isGameOver && player) player.swim();
         }
@@ -718,13 +803,22 @@
         window.addEventListener('keydown', (e) => { if (e.code === 'Space') handleTap(e); });
 
         function triggerQuiz() {
+            if (isEndlessMode) {
+                lives--;
+                score = Math.max(0, score - 50); 
+                if (lives <= 0) endGame();
+                return;
+            }
+
+            if (questionQueue.length === 0) {
+                triggerGrandVictory();
+                return;
+            }
+
             isPaused = true;
             document.getElementById('quiz-screen').classList.remove('hidden');
             
-            const filteredQuestions = QUIZ_DB.filter(item => item.diff === currentDiff);
-            const pool = filteredQuestions.length > 0 ? filteredQuestions : QUIZ_DB;
-            
-            let q = pool[Math.floor(Math.random() * pool.length)];
+            let q = questionQueue[0];
             document.getElementById('question-text').innerText = q.q;
             let cont = document.getElementById('options-container');
             cont.innerHTML = "";
@@ -748,11 +842,16 @@
                 fb.style.color = "#22c55e";
                 score += 20;
                 icebergSize = Math.max(0, icebergSize - 20); 
+                correctAnswersCount++;
+                questionQueue.shift(); 
             } else {
                 fb.innerText = "WRONG! OUCH! 💔";
                 fb.style.color = "#ef4444";
                 lives--;
+                let failedQ = questionQueue.shift();
+                questionQueue.push(failedQ);
             }
+            
             setTimeout(() => {
                 document.getElementById('quiz-screen').classList.add('hidden');
                 fb.innerText = "";
@@ -760,11 +859,11 @@
                 if (lives <= 0) {
                     endGame();
                 } else {
-                    if (icebergSize === 0 && !isBonusMode) {
+                    if (correctAnswersCount >= 5 && !isBonusMode) {
                         triggerBonusMode();
                     }
                     isPaused = false;
-                    animate();
+                    animate(); // RESTART ANIMATION LOOP
                 }
             }, 1000);
         }
@@ -784,3 +883,4 @@
     </script>
 </body>
 </html>
+
