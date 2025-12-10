@@ -300,9 +300,32 @@
             hard: { speed: 5.5, spawnRate: 90, gravity: 0.5, jump: -9 }
         };
 
-        // --- SPRITES (Modified for maximum compatibility) ---
-        // 'b' is now a standard Trash Bin instead of Takeout box which can be invisible white
         const SPRITES = { t: "🐢", j: "🪼", b: "🗑️", s: "🥤", bo: "🍾", p: "🧴" };
+
+        // --- QUESTION DATABASE WITH DIFFICULTY ---
+        // Questions based on "Elara and the Plastic Iceberg.docx" and "GSB Plastic-Free Environment.pptx"
+        const QUIZ_DB = [
+            // EASY: Basic Story & Identification
+            { diff: 'easy', q: "What animal is Ripple?", a: ["Sea Turtle", "Shark", "Dolphin", "Starfish"], c: 0 },
+            { diff: 'easy', q: "What does Elara use to drink?", a: ["Reusable Bottle", "Plastic Cup", "Soda Can", "Paper Cup"], c: 0 },
+            { diff: 'easy', q: "What looks like a jellyfish to turtles?", a: ["Plastic Bag", "Seaweed", "Rocks", "Boats"], c: 0 },
+            { diff: 'easy', q: "Where does Elara walk every morning?", a: ["Sapphire Bay", "Emerald City", "Ruby Beach", "Diamond Lake"], c: 0 },
+            { diff: 'easy', q: "What color was Elara's bottle?", a: ["Blue", "Red", "Green", "Yellow"], c: 0 },
+            
+            // MEDIUM: Concepts & Story Details
+            { diff: 'medium', q: "What is the 'Plastic Iceberg' made of?", a: ["Trash", "Real Ice", "Sand", "Wood"], c: 0 },
+            { diff: 'medium', q: "Who taught Elara about microplastics?", a: ["Mr. Lin", "Her Mom", "Ripple", "The Mayor"], c: 0 },
+            { diff: 'medium', q: "What is a better alternative to plastic straws?", a: ["Bamboo", "Styrofoam", "Rubber", "More Plastic"], c: 0 },
+            { diff: 'medium', q: "What happens to plastic over time?", a: ["Becomes Microplastics", "Disappears", "Turns into food", "Melts into water"], c: 0 },
+            { diff: 'medium', q: "Why did Ripple feel weak?", a: ["He ate plastic", "He was old", "He was tired", "He was hungry"], c: 0 },
+
+            // HARD: Statistics & Specific Facts
+            { diff: 'hard', q: "How many pieces of plastic are in the ocean?", a: ["5.25 Trillion", "1 Billion", "500 Million", "100 Thousand"], c: 0 },
+            { diff: 'hard', q: "How many seabirds die annually from plastic?", a: ["1 Million", "100 Thousand", "50 Million", "500"], c: 0 },
+            { diff: 'hard', q: "What % of baby turtles have plastic in them?", a: ["100%", "50%", "10%", "0%"], c: 0 },
+            { diff: 'hard', q: "How many plastic bags are used every minute?", a: ["1 Million", "1 Thousand", "500", "10"], c: 0 },
+            { diff: 'hard', q: "How long does a plastic bag take to decompose?", a: ["Hundreds of years", "1 Week", "1 Month", "1 Year"], c: 0 }
+        ];
 
         function playTone(type) {
             if (!audioCtx) return;
@@ -367,16 +390,12 @@
                 let angle = Math.min(Math.max(this.dy * 3, -30), 30);
                 ctx.rotate(angle * Math.PI / 180);
                 
-                // FONT FIX: Explicitly list Emoji fonts for iOS/Mac
                 ctx.font = "50px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
-                
-                // VISIBILITY FIX: Add a stroke to ensure visibility against any background
                 ctx.lineWidth = 3;
                 ctx.strokeStyle = "rgba(0,0,0,0.3)";
                 ctx.strokeText(SPRITES.t, 0, 0);
-                
                 ctx.fillText(SPRITES.t, 0, 0);
                 ctx.restore();
             }
@@ -409,17 +428,14 @@
                 let bob = Math.sin(Date.now() / 200) * 5;
                 ctx.save();
                 
-                // FONT FIX: Explicitly list Emoji fonts for iOS/Mac
                 ctx.font = "40px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 
-                // VISIBILITY FIX: Outline the emojis
                 ctx.lineWidth = 4;
                 ctx.strokeStyle = "black"; 
                 ctx.lineJoin = "round";
                 ctx.strokeText(this.icon, this.x, this.y + bob);
-                
                 ctx.fillText(this.icon, this.x, this.y + bob);
                 ctx.restore();
             }
@@ -527,21 +543,16 @@
         tapZone.addEventListener('mousedown', handleTap);
         window.addEventListener('keydown', (e) => { if (e.code === 'Space') handleTap(e); });
 
-        const QUESTIONS = [
-            { q: "What do sea turtles mistake plastic bags for?", a: ["Jellyfish", "Seaweed", "Coral", "Other Turtles"], c: 0 },
-            { q: "How many seabirds die from plastic every year?", a: ["1 Million", "1 Thousand", "100 Birds", "50 Million"], c: 0 },
-            { q: "Who taught Elara about microplastics?", a: ["Mr. Lin", "Her Mom", "Her Teacher", "Ripple"], c: 0 },
-            { q: "What is a sustainable alternative to plastic straws?", a: ["Bamboo", "Styrofoam", "Rubber", "More Plastic"], c: 0 },
-            { q: "How long does a plastic bag take to decompose?", a: ["Forever", "1 Day", "1 Week", "1 Month"], c: 0 },
-            { q: "How many pieces of plastic are in the ocean?", a: ["5.25 Trillion", "1 Million", "100", "Zero"], c: 0 },
-            { q: "What percentage of baby turtles have plastic in them?", a: ["100%", "10%", "50%", "0%"], c: 0 },
-            { q: "What is the 'Plastic Iceberg' made of?", a: ["Trash", "Real Ice", "Sand", "Boats"], c: 0 }
-        ];
-
         function triggerQuiz() {
             isPaused = true;
             document.getElementById('quiz-screen').classList.remove('hidden');
-            let q = QUESTIONS[Math.floor(Math.random() * QUESTIONS.length)];
+            
+            // FILTER QUESTIONS BASED ON DIFFICULTY
+            const filteredQuestions = QUIZ_DB.filter(item => item.diff === currentDiff);
+            // Fallback to all if something goes wrong (robustness)
+            const pool = filteredQuestions.length > 0 ? filteredQuestions : QUIZ_DB;
+            
+            let q = pool[Math.floor(Math.random() * pool.length)];
             document.getElementById('question-text').innerText = q.q;
             let cont = document.getElementById('options-container');
             cont.innerHTML = "";
