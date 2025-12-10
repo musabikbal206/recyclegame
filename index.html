@@ -60,7 +60,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             color: white;
             text-align: center;
             padding: 20px;
@@ -71,46 +71,47 @@
 
         h1 { 
             font-family: 'Fredoka One', cursive; 
-            font-size: clamp(2rem, 5vw, 4rem); /* Responsive font size */
+            font-size: clamp(2rem, 5vw, 4rem); 
             color: var(--sand); 
             text-shadow: 2px 2px 0px #000; 
-            margin-bottom: 1rem; 
+            margin-bottom: 0.5rem; 
         }
         
         p { 
-            font-size: clamp(1rem, 3vw, 1.2rem); 
-            margin-bottom: 2rem; 
+            font-size: clamp(0.9rem, 3vw, 1.1rem); 
+            margin-bottom: 1.5rem; 
             max-width: 600px; 
-            line-height: 1.5; 
+            line-height: 1.4; 
+            color: #e2e8f0;
         }
 
         .btn-group {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             flex-wrap: wrap;
             justify-content: center;
             width: 100%;
+            margin-bottom: 10px;
         }
 
         .btn {
             color: white;
             border: none;
-            padding: 15px 25px;
-            font-size: 1.1rem;
+            padding: 12px 20px;
+            font-size: 1rem;
             font-family: 'Fredoka One', cursive;
             border-radius: 50px;
             cursor: pointer;
             box-shadow: 0 4px 0 rgba(0,0,0,0.2);
             transition: transform 0.1s;
-            min-width: 100px;
-            margin-bottom: 10px;
+            min-width: 90px;
         }
         .btn:active { transform: translateY(4px); box-shadow: none; }
         
         .btn-easy { background: #22c55e; }
         .btn-med { background: #f59e0b; }
         .btn-hard { background: #ef4444; }
-        .btn-alt { background: var(--ocean-light); }
+        .btn-alt { background: var(--ocean-light); margin-top: 10px; }
 
         /* --- HUD --- */
         #hud {
@@ -124,57 +125,80 @@
             z-index: 5;
         }
         .stat-box {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 6px 12px;
             border-radius: 15px;
             color: white;
             font-weight: bold;
             font-size: 0.9rem;
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         /* --- Quiz Modal --- */
-        #quiz-screen { background: rgba(0,0,0,0.9); }
+        #quiz-screen { background: rgba(0,0,0,0.95); }
         
         #quiz-modal {
             background: white;
             color: #1e293b;
             width: 95%;
-            max-width: 400px;
+            max-width: 450px;
             border-radius: 20px;
             padding: 1.5rem;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             border: 4px solid var(--danger);
+            position: relative;
         }
 
-        .quiz-question { font-size: 1.1rem; font-weight: bold; margin-bottom: 1rem; }
-        .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+        .quiz-question { 
+            font-size: 1.1rem; 
+            font-weight: bold; 
+            margin-bottom: 1rem;
+            min-height: 3em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .quiz-options { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; /* 2 columns for 4 options */
+            gap: 10px; 
+        }
+        
         .quiz-btn {
             background: #f1f5f9;
             border: 2px solid #cbd5e1;
-            padding: 12px;
+            padding: 12px 5px;
             border-radius: 10px;
-            font-size: 1rem;
+            font-size: 0.9rem;
             cursor: pointer;
-            text-align: left;
+            text-align: center;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 50px;
         }
         .quiz-btn:active { background: #cbd5e1; }
-        .quiz-feedback { margin-top: 10px; font-weight: bold; height: 20px; color: var(--danger); }
+        .quiz-feedback { margin-top: 15px; font-weight: bold; height: 20px; color: var(--danger); }
 
         /* --- Tap Zone Overlay --- */
         #tap-zone {
             position: absolute;
             top: 0; left: 0; 
             width: 100%; height: 100%;
-            z-index: 2; /* Above canvas, below UI */
+            z-index: 2; 
         }
         
         #mobile-hint {
             position: absolute;
-            bottom: 15%;
+            bottom: 20%;
             width: 100%;
             text-align: center;
-            color: rgba(255,255,255,0.6);
+            color: rgba(255,255,255,0.8);
             font-size: 1.2rem;
             font-weight: bold;
             pointer-events: none;
@@ -182,7 +206,13 @@
             animation: pulse 1.5s infinite;
         }
         
-        @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+
+        /* Small screen adjustments */
+        @media (max-width: 380px) {
+            .quiz-options { grid-template-columns: 1fr; } /* Stack options on very small screens */
+            h1 { font-size: 1.8rem; }
+        }
     </style>
 </head>
 <body>
@@ -195,6 +225,7 @@
 
         <div id="hud" class="hidden">
             <div class="stat-box">❤️ <span id="lives">3</span></div>
+            <div class="stat-box">🧊 <span id="iceberg-hp">100%</span></div>
             <div class="stat-box">⭐ <span id="score">0</span></div>
         </div>
 
@@ -202,23 +233,22 @@
         <div id="start-screen" class="ui-screen">
             <h1>Ripple's Rescue</h1>
             <p>
-                Tap to Swim Up 🐢<br>
-                Avoid Trash 🥤<br>
-                Eat Jellyfish 🪼
+                Swim safely, Ripple! 🐢<br>
+                Avoid the trash to stop the Iceberg.<br>
             </p>
-            <p style="font-size: 0.9rem; color: #cbd5e1;">Select Difficulty:</p>
+            <p style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 10px;">Select Difficulty:</p>
             <div class="btn-group">
                 <button class="btn btn-easy" onclick="initGame('easy')">EASY</button>
                 <button class="btn btn-med" onclick="initGame('medium')">MEDIUM</button>
+                <button class="btn btn-hard" onclick="initGame('hard')">HARD</button>
             </div>
-            <button class="btn btn-hard" style="margin-top:5px; padding: 10px 20px; font-size: 0.9rem;" onclick="initGame('hard')">HARD</button>
         </div>
 
         <!-- Quiz Screen -->
         <div id="quiz-screen" class="ui-screen hidden">
             <div id="quiz-modal">
-                <h2 style="color:var(--danger); font-size:1.4rem; margin-bottom:0.5rem;">💥 TRASH HIT!</h2>
-                <p style="font-size:0.9rem; margin-bottom:1rem; color: #64748b;">Recycle it to save Ripple!</p>
+                <h2 style="color:var(--danger); font-size:1.3rem; margin-bottom:0.5rem;">⚠️ TRASH HIT! ⚠️</h2>
+                <p style="font-size:0.85rem; margin-bottom:1rem; color: #64748b;">Answer correctly to recycle it!</p>
                 <div id="question-text" class="quiz-question">...</div>
                 <div id="options-container" class="quiz-options"></div>
                 <div id="quiz-feedback" class="quiz-feedback"></div>
@@ -227,15 +257,16 @@
 
         <!-- Game Over Screen -->
         <div id="game-over-screen" class="ui-screen hidden">
-            <h1>Game Over</h1>
-            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+            <h1 id="end-title">Game Over</h1>
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; width: 80%;">
                 <h2>Score: <span id="final-score">0</span></h2>
+                <p id="iceberg-status" style="margin-bottom: 5px; color: #bae6fd;">Iceberg Remaining: 100%</p>
                 <p id="rank-text" style="font-weight:bold; color:var(--sand); margin-bottom:0;">Rank: Litterbug</p>
             </div>
-            <button class="btn btn-alt" onclick="showStartScreen()">MENU</button>
+            <button class="btn btn-alt" onclick="showStartScreen()">MAIN MENU</button>
         </div>
 
-        <div id="mobile-hint" class="hidden">TAP TO SWIM</div>
+        <div id="mobile-hint" class="hidden">TAP TO SWIM 👆</div>
     </div>
 
     <script>
@@ -245,7 +276,6 @@
         const tapZone = document.getElementById('tap-zone');
         
         // --- Mobile Audio Fix ---
-        // Create AudioContext but resume it only on first user tap
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx = new AudioContext();
         
@@ -257,16 +287,16 @@
 
         // --- Game Variables ---
         let animationId;
-        let lastTime = 0;
         let frames = 0;
         let score = 0;
         let lives = 3;
+        let icebergSize = 100; // 0 to 100
         let gameSpeed = 2;
         let isPaused = false;
         let isGameOver = false;
         let currentDiff = 'medium';
 
-        // --- Responsive Resizing ---
+        // --- Resize Logic ---
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -276,9 +306,9 @@
 
         // --- Settings ---
         const SETTINGS = {
-            easy: { speed: 2, spawnRate: 150, gravity: 0.25, jump: -5 },
-            medium: { speed: 3, spawnRate: 110, gravity: 0.35, jump: -7 },
-            hard: { speed: 5, spawnRate: 80, gravity: 0.5, jump: -9 }
+            easy: { speed: 2, spawnRate: 160, gravity: 0.25, jump: -5 },
+            medium: { speed: 3.5, spawnRate: 120, gravity: 0.35, jump: -7 },
+            hard: { speed: 5.5, spawnRate: 90, gravity: 0.5, jump: -9 }
         };
 
         // --- Sprites ---
@@ -291,22 +321,21 @@
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-
             const now = audioCtx.currentTime;
             
             if (type === 'jump') {
                 osc.frequency.setValueAtTime(300, now);
-                osc.frequency.exponentialRampToValueAtTime(600, now + 0.1);
+                osc.frequency.linearRampToValueAtTime(500, now + 0.1);
                 gain.gain.setValueAtTime(0.1, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                gain.gain.linearRampToValueAtTime(0, now + 0.1);
                 osc.start(now);
                 osc.stop(now + 0.1);
             } else if (type === 'coin') {
                 osc.type = 'square';
-                osc.frequency.setValueAtTime(800, now);
-                osc.frequency.setValueAtTime(1200, now + 0.1);
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.setValueAtTime(900, now + 0.1);
                 gain.gain.setValueAtTime(0.05, now);
-                gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                gain.gain.linearRampToValueAtTime(0, now + 0.2);
                 osc.start(now);
                 osc.stop(now + 0.2);
             } else if (type === 'crash') {
@@ -314,7 +343,7 @@
                 osc.frequency.setValueAtTime(150, now);
                 osc.frequency.exponentialRampToValueAtTime(50, now + 0.3);
                 gain.gain.setValueAtTime(0.2, now);
-                gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                gain.gain.linearRampToValueAtTime(0, now + 0.3);
                 osc.start(now);
                 osc.stop(now + 0.3);
             }
@@ -323,7 +352,7 @@
         // --- Classes ---
         class Turtle {
             constructor() {
-                this.size = 50; // Bigger for visibility
+                this.size = 50;
                 this.x = canvas.width * 0.15;
                 this.y = canvas.height / 2;
                 this.dy = 0;
@@ -346,12 +375,13 @@
             draw() {
                 ctx.save();
                 ctx.translate(this.x, this.y);
-                // Rotate based on velocity
                 let angle = Math.min(Math.max(this.dy * 3, -30), 30);
                 ctx.rotate(angle * Math.PI / 180);
                 ctx.font = `${this.size}px Arial`;
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
+                ctx.shadowColor = "rgba(0,0,0,0.5)";
+                ctx.shadowBlur = 5;
                 ctx.fillText(SPRITES.t, 0, 0);
                 ctx.restore();
             }
@@ -382,7 +412,6 @@
                 if (this.x < -50) this.marked = true;
             }
             draw() {
-                // Bobbing animation
                 let bob = Math.sin(Date.now() / 200) * 5;
                 ctx.font = "40px Arial";
                 ctx.textAlign = "center";
@@ -396,11 +425,12 @@
         let obstacles = [];
 
         function initGame(difficulty) {
-            unlockAudio(); // Important for mobile sound
+            unlockAudio();
             currentDiff = difficulty;
             gameSpeed = SETTINGS[difficulty].speed;
             lives = 3;
             score = 0;
+            icebergSize = 100; // Reset Iceberg
             frames = 0;
             obstacles = [];
             player = new Turtle();
@@ -412,9 +442,7 @@
             document.getElementById('hud').classList.remove('hidden');
             document.getElementById('mobile-hint').classList.remove('hidden');
             
-            // Hide hint after 3 seconds
-            setTimeout(() => document.getElementById('mobile-hint').classList.add('hidden'), 3000);
-
+            setTimeout(() => document.getElementById('mobile-hint').classList.add('hidden'), 2500);
             animate();
         }
 
@@ -430,18 +458,35 @@
             
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Background Logic
+            // 1. Draw Ocean
             let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
             grad.addColorStop(0, "#60a5fa");
             grad.addColorStop(1, "#1e3a8a");
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Player
+            // 2. Draw ICEBERG (Dynamic Size)
+            if (icebergSize > 0) {
+                ctx.save();
+                ctx.fillStyle = "rgba(255, 255, 255, 0.2)"; // Semi-transparent white
+                ctx.beginPath();
+                // A jagged polygon shape at the bottom
+                ctx.moveTo(0, canvas.height);
+                // Left peak
+                ctx.lineTo(0, canvas.height - (canvas.height * (icebergSize/150))); 
+                // Middle dip
+                ctx.lineTo(canvas.width/2, canvas.height - (canvas.height * (icebergSize/200))); 
+                // Right peak
+                ctx.lineTo(canvas.width, canvas.height - (canvas.height * (icebergSize/120))); 
+                ctx.lineTo(canvas.width, canvas.height);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // 3. Game Objects
             player.update();
             player.draw();
 
-            // Obstacles
             if (frames % SETTINGS[currentDiff].spawnRate === 0) {
                 obstacles.push(new Obstacle());
             }
@@ -450,9 +495,9 @@
                 obs.update();
                 obs.draw();
 
-                // Collision Detection (Simple Radius)
+                // Collision
                 let dist = Math.hypot(player.x - obs.x, player.y - obs.y);
-                if (dist < 45) { // Hitbox size
+                if (dist < 45) {
                     if (obs.type === 'food') {
                         obs.marked = true;
                         score += 10;
@@ -470,52 +515,92 @@
             // UI Update
             document.getElementById('score').innerText = score;
             document.getElementById('lives').innerText = lives;
+            document.getElementById('iceberg-hp').innerText = icebergSize + "%";
 
             frames++;
             animationId = requestAnimationFrame(animate);
         }
 
-        // --- Input Handling (Mobile Optimized) ---
+        // --- Input ---
         function handleTap(e) {
-            if (e.cancelable) e.preventDefault(); // STOP SCROLLING/ZOOMING
-            if (!isPaused && !isGameOver) {
-                player.swim();
-            }
+            if (e.cancelable) e.preventDefault();
+            if (!isPaused && !isGameOver) player.swim();
         }
-        
-        // Listeners on the "Tap Zone" div to ensure full coverage
         tapZone.addEventListener('touchstart', handleTap, { passive: false });
         tapZone.addEventListener('mousedown', handleTap);
-        
-        // Spacebar support for desktop testing
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') handleTap(e);
-        });
+        window.addEventListener('keydown', (e) => { if (e.code === 'Space') handleTap(e); });
 
-        // --- Quiz Logic ---
+        // --- 4-OPTION QUIZ DATABASE ---
+        // Sources: Slides & Story provided in prompt history
         const QUESTIONS = [
-            {q: "Turtles mistake plastic bags for...", a: ["Jellyfish", "Plants"], c: 0},
-            {q: "How many seabirds die yearly from plastic?", a: ["1 Million", "1 Thousand"], c: 0},
-            {q: "Is the 'Plastic Iceberg' real ice?", a: ["Yes", "No, it's trash"], c: 1},
-            {q: "Best alternative to plastic straws?", a: ["Bamboo", "More Plastic"], c: 0}
+            {
+                q: "What do sea turtles mistake plastic bags for?", 
+                a: ["Jellyfish", "Seaweed", "Coral", "Other Turtles"], 
+                c: 0
+            },
+            {
+                q: "How many seabirds die from plastic every year?", 
+                a: ["1 Million", "1 Thousand", "100 Birds", "50 Million"], 
+                c: 0
+            },
+            {
+                q: "Who taught Elara about microplastics?", 
+                a: ["Mr. Lin", "Her Mom", "Her Teacher", "Ripple"], 
+                c: 0
+            },
+            {
+                q: "What is a sustainable alternative to plastic straws?", 
+                a: ["Bamboo", "Styrofoam", "Rubber", "More Plastic"], 
+                c: 0
+            },
+            {
+                q: "How long does a plastic bag take to decompose?", 
+                a: ["Forever", "1 Day", "1 Week", "1 Month"], 
+                c: 0
+            },
+            {
+                q: "How many pieces of plastic are in the ocean?", 
+                a: ["5.25 Trillion", "1 Million", "100", "Zero"], 
+                c: 0
+            },
+            {
+                q: "What percentage of baby turtles have plastic in them?", 
+                a: ["100%", "10%", "50%", "0%"], 
+                c: 0
+            },
+            {
+                q: "What is the 'Plastic Iceberg' made of?", 
+                a: ["Trash", "Real Ice", "Sand", "Boats"], 
+                c: 0
+            }
         ];
 
         function triggerQuiz() {
             isPaused = true;
             document.getElementById('quiz-screen').classList.remove('hidden');
             
+            // Get random question
             let q = QUESTIONS[Math.floor(Math.random() * QUESTIONS.length)];
+            
             document.getElementById('question-text').innerText = q.q;
             let cont = document.getElementById('options-container');
             cont.innerHTML = "";
             
-            q.a.forEach((opt, idx) => {
+            // Create a shuffled copy of options with original indices to track correct answer
+            let ops = q.a.map((txt, i) => ({txt, i}));
+            // Shuffle logic
+            ops.sort(() => Math.random() - 0.5);
+
+            ops.forEach(opt => {
                 let btn = document.createElement('button');
                 btn.className = "quiz-btn";
-                btn.innerText = opt;
-                // Add touchstart logic for instant response on mobile
-                btn.ontouchstart = (e) => { e.preventDefault(); checkAnswer(idx === q.c); };
-                btn.onclick = () => checkAnswer(idx === q.c);
+                btn.innerText = opt.txt;
+                
+                // Check if this shuffled button corresponds to the correct index (q.c)
+                let isCorrect = (opt.i === q.c);
+                
+                btn.ontouchstart = (e) => { e.preventDefault(); checkAnswer(isCorrect); };
+                btn.onclick = () => checkAnswer(isCorrect);
                 cont.appendChild(btn);
             });
         }
@@ -523,9 +608,10 @@
         function checkAnswer(correct) {
             let fb = document.getElementById('quiz-feedback');
             if (correct) {
-                fb.innerText = "CORRECT! SAVED! ♻️";
+                fb.innerText = "CORRECT! Iceberg Shrinks! 🧊⬇️";
                 fb.style.color = "#22c55e";
                 score += 20;
+                icebergSize = Math.max(0, icebergSize - 15); // SHRINK ICEBERG
             } else {
                 fb.innerText = "WRONG! OUCH! 💔";
                 fb.style.color = "#ef4444";
@@ -538,6 +624,11 @@
                 
                 if (lives <= 0) {
                     endGame();
+                } else if (icebergSize === 0 && score > 100) {
+                    // Bonus condition: If iceberg is gone, maybe give huge bonus? 
+                    // For now just continue game but iceberg is gone visually.
+                    isPaused = false;
+                    animate();
                 } else {
                     isPaused = false;
                     animate();
@@ -550,10 +641,13 @@
             isPaused = true;
             document.getElementById('game-over-screen').classList.remove('hidden');
             document.getElementById('final-score').innerText = score;
+            document.getElementById('iceberg-status').innerText = `Iceberg Remaining: ${icebergSize}%`;
             
             let rank = "Litterbug 🗑️";
             if (score > 100) rank = "Eco Warrior 🛡️";
             if (score > 300) rank = "Ocean Hero 🧜";
+            if (icebergSize === 0) rank = "LEGENDARY SAVIOR 👑"; // Secret rank
+            
             document.getElementById('rank-text').innerText = "Rank: " + rank;
         }
 
