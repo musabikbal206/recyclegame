@@ -10,6 +10,8 @@
         :root {
             --ocean-dark: #1e3a8a;
             --ocean-light: #3b82f6;
+            --ocean-clean: #22d3ee; 
+            --ocean-deep-clean: #0891b2;
             --sand: #fde047;
             --turtle-green: #22c55e;
             --danger: #ef4444;
@@ -44,6 +46,7 @@
             height: 100%;
             background: linear-gradient(to bottom, #60a5fa, #1e3a8a);
             overflow: hidden;
+            transition: background 2s ease;
         }
 
         canvas {
@@ -137,6 +140,21 @@
             gap: 5px;
         }
 
+        #timer-box {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 215, 0, 0.8);
+            color: black;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-family: 'Fredoka One', cursive;
+            display: none;
+            z-index: 5;
+        }
+
         /* --- Quiz Modal --- */
         #quiz-screen { background: rgba(0,0,0,0.95); }
         
@@ -186,6 +204,24 @@
         .quiz-btn:active { background: #cbd5e1; }
         .quiz-feedback { margin-top: 15px; font-weight: bold; height: 20px; color: var(--danger); }
 
+        /* --- Victory Message --- */
+        #victory-message {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Fredoka One', cursive;
+            font-size: 2.5rem;
+            color: #fde047; /* Sand/Gold */
+            text-shadow: 0px 4px 10px rgba(0,0,0,0.5);
+            text-align: center;
+            pointer-events: none;
+            z-index: 20;
+            opacity: 0;
+            transition: opacity 0.5s;
+            width: 100%;
+        }
+
         #tap-zone {
             position: absolute;
             top: 0; left: 0; 
@@ -225,12 +261,16 @@
             <div class="stat-box">🧊 <span id="iceberg-hp">100%</span></div>
             <div class="stat-box">⭐ <span id="score">0</span></div>
         </div>
+        
+        <div id="timer-box">BONUS: 60s</div>
+
+        <div id="victory-message">OCEAN CLEANED!<br>BONUS MODE! 🌟</div>
 
         <div id="start-screen" class="ui-screen">
             <h1>Ripple's Rescue</h1>
             <p>
                 Swim safely, Ripple! 🐢<br>
-                Avoid the trash to stop the Iceberg.<br>
+                Recycle trash to <strong>Destroy the Iceberg!</strong><br>
             </p>
             <p style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 10px;">Select Difficulty:</p>
             <div class="btn-group">
@@ -285,6 +325,8 @@
         let gameSpeed = 2;
         let isPaused = false;
         let isGameOver = false;
+        let isBonusMode = false;
+        let bonusEndTime = 0; // Timestamp for when bonus ends
         let currentDiff = 'medium';
 
         function resize() {
@@ -300,26 +342,19 @@
             hard: { speed: 5.5, spawnRate: 90, gravity: 0.5, jump: -9 }
         };
 
-        const SPRITES = { t: "🐢", j: "🪼", b: "🗑️", s: "🥤", bo: "🍾", p: "🧴" };
+        const SPRITES = { t: "🐢", j: "🪼", b: "🗑️", s: "🥤", bo: "🍾", p: "🧴", star: "⭐", fish: "🐠" };
 
-        // --- QUESTION DATABASE WITH DIFFICULTY ---
-        // Questions based on "Elara and the Plastic Iceberg.docx" and "GSB Plastic-Free Environment.pptx"
         const QUIZ_DB = [
-            // EASY: Basic Story & Identification
             { diff: 'easy', q: "What animal is Ripple?", a: ["Sea Turtle", "Shark", "Dolphin", "Starfish"], c: 0 },
             { diff: 'easy', q: "What does Elara use to drink?", a: ["Reusable Bottle", "Plastic Cup", "Soda Can", "Paper Cup"], c: 0 },
             { diff: 'easy', q: "What looks like a jellyfish to turtles?", a: ["Plastic Bag", "Seaweed", "Rocks", "Boats"], c: 0 },
             { diff: 'easy', q: "Where does Elara walk every morning?", a: ["Sapphire Bay", "Emerald City", "Ruby Beach", "Diamond Lake"], c: 0 },
             { diff: 'easy', q: "What color was Elara's bottle?", a: ["Blue", "Red", "Green", "Yellow"], c: 0 },
-            
-            // MEDIUM: Concepts & Story Details
             { diff: 'medium', q: "What is the 'Plastic Iceberg' made of?", a: ["Trash", "Real Ice", "Sand", "Wood"], c: 0 },
             { diff: 'medium', q: "Who taught Elara about microplastics?", a: ["Mr. Lin", "Her Mom", "Ripple", "The Mayor"], c: 0 },
             { diff: 'medium', q: "What is a better alternative to plastic straws?", a: ["Bamboo", "Styrofoam", "Rubber", "More Plastic"], c: 0 },
             { diff: 'medium', q: "What happens to plastic over time?", a: ["Becomes Microplastics", "Disappears", "Turns into food", "Melts into water"], c: 0 },
             { diff: 'medium', q: "Why did Ripple feel weak?", a: ["He ate plastic", "He was old", "He was tired", "He was hungry"], c: 0 },
-
-            // HARD: Statistics & Specific Facts
             { diff: 'hard', q: "How many pieces of plastic are in the ocean?", a: ["5.25 Trillion", "1 Billion", "500 Million", "100 Thousand"], c: 0 },
             { diff: 'hard', q: "How many seabirds die annually from plastic?", a: ["1 Million", "100 Thousand", "50 Million", "500"], c: 0 },
             { diff: 'hard', q: "What % of baby turtles have plastic in them?", a: ["100%", "50%", "10%", "0%"], c: 0 },
@@ -346,8 +381,8 @@
                     osc.stop(now + 0.1);
                 } else if (type === 'coin') {
                     osc.type = 'square';
-                    osc.frequency.setValueAtTime(600, now);
-                    osc.frequency.setValueAtTime(900, now + 0.1);
+                    osc.frequency.setValueAtTime(isBonusMode ? 800 : 600, now);
+                    osc.frequency.setValueAtTime(isBonusMode ? 1200 : 900, now + 0.1);
                     gain.gain.setValueAtTime(0.05, now);
                     gain.gain.linearRampToValueAtTime(0, now + 0.2);
                     osc.start(now);
@@ -390,13 +425,22 @@
                 let angle = Math.min(Math.max(this.dy * 3, -30), 30);
                 ctx.rotate(angle * Math.PI / 180);
                 
-                ctx.font = "50px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
+                // FORCE NORMAL FONT FOR COLOR EMOJIS ON IOS
+                ctx.font = "normal 50px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
+                
+                // Outline logic preserved but font fixed
                 ctx.lineWidth = 3;
                 ctx.strokeStyle = "rgba(0,0,0,0.3)";
                 ctx.strokeText(SPRITES.t, 0, 0);
                 ctx.fillText(SPRITES.t, 0, 0);
+
+                if (isBonusMode) {
+                    ctx.font = "normal 30px sans-serif";
+                    ctx.fillText("👑", 0, -35);
+                }
+
                 ctx.restore();
             }
             swim() {
@@ -409,15 +453,21 @@
             constructor() {
                 this.x = canvas.width + 50;
                 this.y = Math.random() * (canvas.height - 100) + 50;
-                this.speed = SETTINGS[currentDiff].speed;
+                this.speed = SETTINGS[currentDiff].speed + (isBonusMode ? 2 : 0);
                 this.marked = false;
-                let r = Math.random();
-                if (r < 0.6) {
-                    this.type = 'trash';
-                    this.icon = r < 0.2 ? SPRITES.b : (r < 0.4 ? SPRITES.s : SPRITES.bo);
-                } else {
+                
+                if (isBonusMode) {
                     this.type = 'food';
-                    this.icon = SPRITES.j;
+                    this.icon = Math.random() > 0.7 ? SPRITES.star : SPRITES.j;
+                } else {
+                    let r = Math.random();
+                    if (r < 0.6) {
+                        this.type = 'trash';
+                        this.icon = r < 0.2 ? SPRITES.b : (r < 0.4 ? SPRITES.s : SPRITES.bo);
+                    } else {
+                        this.type = 'food';
+                        this.icon = SPRITES.j;
+                    }
                 }
             }
             update() {
@@ -427,13 +477,12 @@
             draw() {
                 let bob = Math.sin(Date.now() / 200) * 5;
                 ctx.save();
-                
-                ctx.font = "40px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
+                // FORCE NORMAL FONT FOR COLOR EMOJIS ON IOS
+                ctx.font = "normal 40px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
-                
                 ctx.lineWidth = 4;
-                ctx.strokeStyle = "black"; 
+                ctx.strokeStyle = isBonusMode ? "white" : "black"; 
                 ctx.lineJoin = "round";
                 ctx.strokeText(this.icon, this.x, this.y + bob);
                 ctx.fillText(this.icon, this.x, this.y + bob);
@@ -455,6 +504,7 @@
             icebergSize = 100;
             frames = 0;
             obstacles = [];
+            isBonusMode = false;
             player = new Turtle();
             isPaused = false;
             isGameOver = false;
@@ -463,6 +513,9 @@
             document.getElementById('game-over-screen').classList.add('hidden');
             document.getElementById('hud').classList.remove('hidden');
             document.getElementById('mobile-hint').classList.remove('hidden');
+            document.getElementById('timer-box').style.display = 'none';
+            document.getElementById('victory-message').style.opacity = 0;
+            
             setTimeout(() => document.getElementById('mobile-hint').classList.add('hidden'), 2500);
             
             if (animationId) cancelAnimationFrame(animationId);
@@ -475,18 +528,57 @@
             document.getElementById('start-screen').classList.remove('hidden');
         }
 
+        function triggerBonusMode() {
+            isBonusMode = true;
+            lives = 3; 
+            bonusEndTime = Date.now() + 60000; // 60 Seconds
+            document.getElementById('timer-box').style.display = 'block';
+            
+            const msg = document.getElementById('victory-message');
+            msg.innerHTML = "OCEAN CLEANED!<br>BONUS MODE! 🌟";
+            msg.style.color = "#fde047";
+            msg.style.opacity = 1;
+            setTimeout(() => msg.style.opacity = 0, 3000);
+        }
+
+        function endBonusMode() {
+            isBonusMode = false;
+            icebergSize = 30; // Trash Returns
+            document.getElementById('timer-box').style.display = 'none';
+            
+            const msg = document.getElementById('victory-message');
+            msg.innerHTML = "⚠️ TRASH RETURNED!<br>Stay Alert!";
+            msg.style.color = "#ef4444";
+            msg.style.opacity = 1;
+            setTimeout(() => msg.style.opacity = 0, 3000);
+        }
+
         function animate() {
             if (isPaused || isGameOver) return;
             
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
+            // --- DRAW BACKGROUND ---
             let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            grad.addColorStop(0, "#60a5fa");
-            grad.addColorStop(1, "#1e3a8a");
+            if (isBonusMode) {
+                grad.addColorStop(0, "#22d3ee"); 
+                grad.addColorStop(1, "#0891b2");
+                
+                // Timer Logic
+                let remaining = Math.ceil((bonusEndTime - Date.now()) / 1000);
+                document.getElementById('timer-box').innerText = "BONUS: " + remaining + "s";
+                if (remaining <= 0) {
+                    endBonusMode();
+                }
+            } else {
+                grad.addColorStop(0, "#60a5fa");
+                grad.addColorStop(1, "#1e3a8a");
+            }
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            if (icebergSize > 0) {
+            // --- DRAW ICEBERG ---
+            if (!isBonusMode && icebergSize > 0) {
                 ctx.save();
                 ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
                 ctx.beginPath();
@@ -502,7 +594,8 @@
             player.update();
             player.draw();
 
-            if (frames % SETTINGS[currentDiff].spawnRate === 0) {
+            let currentSpawnRate = isBonusMode ? 40 : SETTINGS[currentDiff].spawnRate;
+            if (frames % currentSpawnRate === 0) {
                 obstacles.push(new Obstacle());
             }
 
@@ -514,7 +607,7 @@
                 if (dist < 45) {
                     if (obs.type === 'food') {
                         obs.marked = true;
-                        score += 10;
+                        score += (obs.icon === SPRITES.star ? 50 : 10);
                         playTone('coin');
                     } else if (obs.type === 'trash') {
                         obs.marked = true;
@@ -547,9 +640,7 @@
             isPaused = true;
             document.getElementById('quiz-screen').classList.remove('hidden');
             
-            // FILTER QUESTIONS BASED ON DIFFICULTY
             const filteredQuestions = QUIZ_DB.filter(item => item.diff === currentDiff);
-            // Fallback to all if something goes wrong (robustness)
             const pool = filteredQuestions.length > 0 ? filteredQuestions : QUIZ_DB;
             
             let q = pool[Math.floor(Math.random() * pool.length)];
@@ -575,7 +666,7 @@
                 fb.innerText = "CORRECT! Iceberg Shrinks! 🧊⬇️";
                 fb.style.color = "#22c55e";
                 score += 20;
-                icebergSize = Math.max(0, icebergSize - 15);
+                icebergSize = Math.max(0, icebergSize - 20); 
             } else {
                 fb.innerText = "WRONG! OUCH! 💔";
                 fb.style.color = "#ef4444";
@@ -584,9 +675,13 @@
             setTimeout(() => {
                 document.getElementById('quiz-screen').classList.add('hidden');
                 fb.innerText = "";
+                
                 if (lives <= 0) {
                     endGame();
                 } else {
+                    if (icebergSize === 0 && !isBonusMode) {
+                        triggerBonusMode();
+                    }
                     isPaused = false;
                     animate();
                 }
