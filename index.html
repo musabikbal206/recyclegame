@@ -16,7 +16,6 @@
             --text-main: #ffffff;
         }
 
-        /* CRITICAL FOR MOBILE: Prevents gestures and selection */
         * { 
             margin: 0; 
             padding: 0; 
@@ -31,7 +30,6 @@
             background-color: #0f172a;
             font-family: 'Nunito', sans-serif;
             overflow: hidden;
-            /* Use dvh for dynamic viewport height (fixes iOS address bar issue) */
             height: 100vh;
             height: 100dvh;
             width: 100vw;
@@ -99,7 +97,7 @@
         .btn {
             color: white;
             border: none;
-            padding: 15px 25px; /* Larger touch target */
+            padding: 15px 25px;
             font-size: 1.1rem;
             font-family: 'Fredoka One', cursive;
             border-radius: 50px;
@@ -118,7 +116,7 @@
         /* --- HUD --- */
         #hud {
             position: absolute;
-            top: env(safe-area-inset-top, 10px); /* iOS Safe Area */
+            top: env(safe-area-inset-top, 10px);
             left: 10px;
             right: 10px;
             display: flex;
@@ -183,13 +181,11 @@
             align-items: center;
             justify-content: center;
             min-height: 50px;
-            /* Prevent double-tap zoom on buttons */
             touch-action: manipulation; 
         }
         .quiz-btn:active { background: #cbd5e1; }
         .quiz-feedback { margin-top: 15px; font-weight: bold; height: 20px; color: var(--danger); }
 
-        /* --- Tap Zone Overlay --- */
         #tap-zone {
             position: absolute;
             top: 0; left: 0; 
@@ -222,8 +218,6 @@
 
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
-        
-        <!-- Invisible layer to catch taps -->
         <div id="tap-zone"></div>
 
         <div id="hud" class="hidden">
@@ -232,7 +226,6 @@
             <div class="stat-box">⭐ <span id="score">0</span></div>
         </div>
 
-        <!-- Start Screen -->
         <div id="start-screen" class="ui-screen">
             <h1>Ripple's Rescue</h1>
             <p>
@@ -241,14 +234,12 @@
             </p>
             <p style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 10px;">Select Difficulty:</p>
             <div class="btn-group">
-                <!-- Using ontouchstart for immediate response on iPhone -->
                 <button class="btn btn-easy" ontouchstart="initGame('easy')" onclick="initGame('easy')">EASY</button>
                 <button class="btn btn-med" ontouchstart="initGame('medium')" onclick="initGame('medium')">MEDIUM</button>
                 <button class="btn btn-hard" ontouchstart="initGame('hard')" onclick="initGame('hard')">HARD</button>
             </div>
         </div>
 
-        <!-- Quiz Screen -->
         <div id="quiz-screen" class="ui-screen hidden">
             <div id="quiz-modal">
                 <h2 style="color:var(--danger); font-size:1.3rem; margin-bottom:0.5rem;">⚠️ TRASH HIT! ⚠️</h2>
@@ -259,7 +250,6 @@
             </div>
         </div>
 
-        <!-- Game Over Screen -->
         <div id="game-over-screen" class="ui-screen hidden">
             <h1 id="end-title">Game Over</h1>
             <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; width: 80%;">
@@ -274,28 +264,19 @@
     </div>
 
     <script>
-        // --- Setup Canvas & Context ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const tapZone = document.getElementById('tap-zone');
-        
-        // --- Audio Context (Lazy Load for iOS) ---
         let audioCtx = null;
         
         function initAudio() {
             if (!audioCtx) {
-                // Initialize ONLY on user gesture
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (AudioContext) {
-                    audioCtx = new AudioContext();
-                }
+                if (AudioContext) audioCtx = new AudioContext();
             }
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         }
 
-        // --- Game Variables ---
         let animationId;
         let frames = 0;
         let score = 0;
@@ -306,7 +287,6 @@
         let isGameOver = false;
         let currentDiff = 'medium';
 
-        // --- Resize Logic ---
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -314,21 +294,19 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // --- Settings ---
         const SETTINGS = {
             easy: { speed: 2, spawnRate: 160, gravity: 0.25, jump: -5 },
             medium: { speed: 3.5, spawnRate: 120, gravity: 0.35, jump: -7 },
             hard: { speed: 5.5, spawnRate: 90, gravity: 0.5, jump: -9 }
         };
 
-        const SPRITES = { t: "🐢", j: "🪼", b: "🥡", s: "🥤", bo: "🍾", p: "🧴" };
+        // --- SPRITES (Modified for maximum compatibility) ---
+        // 'b' is now a standard Trash Bin instead of Takeout box which can be invisible white
+        const SPRITES = { t: "🐢", j: "🪼", b: "🗑️", s: "🥤", bo: "🍾", p: "🧴" };
 
-        // --- Audio Logic ---
         function playTone(type) {
             if (!audioCtx) return;
-            // Guard against audio playing before context is ready
             if (audioCtx.state === 'suspended') audioCtx.resume();
-
             try {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
@@ -360,12 +338,9 @@
                     osc.start(now);
                     osc.stop(now + 0.3);
                 }
-            } catch (e) {
-                console.log("Audio play failed (harmless on mobile if muted):", e);
-            }
+            } catch (e) {}
         }
 
-        // --- Classes ---
         class Turtle {
             constructor() {
                 this.size = 50;
@@ -377,7 +352,6 @@
             update() {
                 this.dy += this.settings.gravity;
                 this.y += this.dy;
-
                 if (this.y + this.size/2 > canvas.height) {
                     this.y = canvas.height - this.size/2;
                     this.dy = 0;
@@ -392,11 +366,17 @@
                 ctx.translate(this.x, this.y);
                 let angle = Math.min(Math.max(this.dy * 3, -30), 30);
                 ctx.rotate(angle * Math.PI / 180);
-                ctx.font = `${this.size}px Arial`;
+                
+                // FONT FIX: Explicitly list Emoji fonts for iOS/Mac
+                ctx.font = "50px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
-                ctx.shadowColor = "rgba(0,0,0,0.5)";
-                ctx.shadowBlur = 5;
+                
+                // VISIBILITY FIX: Add a stroke to ensure visibility against any background
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = "rgba(0,0,0,0.3)";
+                ctx.strokeText(SPRITES.t, 0, 0);
+                
                 ctx.fillText(SPRITES.t, 0, 0);
                 ctx.restore();
             }
@@ -412,7 +392,6 @@
                 this.y = Math.random() * (canvas.height - 100) + 50;
                 this.speed = SETTINGS[currentDiff].speed;
                 this.marked = false;
-                
                 let r = Math.random();
                 if (r < 0.6) {
                     this.type = 'trash';
@@ -428,21 +407,29 @@
             }
             draw() {
                 let bob = Math.sin(Date.now() / 200) * 5;
-                ctx.font = "40px Arial";
+                ctx.save();
+                
+                // FONT FIX: Explicitly list Emoji fonts for iOS/Mac
+                ctx.font = "40px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
+                
+                // VISIBILITY FIX: Outline the emojis
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = "black"; 
+                ctx.lineJoin = "round";
+                ctx.strokeText(this.icon, this.x, this.y + bob);
+                
                 ctx.fillText(this.icon, this.x, this.y + bob);
+                ctx.restore();
             }
         }
 
-        // --- State Management ---
         let player;
         let obstacles = [];
 
         function initGame(difficulty) {
-            initAudio(); // KEY for iOS
-            
-            // Prevent double-firing if both touch/click register
+            initAudio();
             if (document.getElementById('hud').classList.contains('hidden') === false) return;
 
             currentDiff = difficulty;
@@ -460,7 +447,6 @@
             document.getElementById('game-over-screen').classList.add('hidden');
             document.getElementById('hud').classList.remove('hidden');
             document.getElementById('mobile-hint').classList.remove('hidden');
-            
             setTimeout(() => document.getElementById('mobile-hint').classList.add('hidden'), 2500);
             
             if (animationId) cancelAnimationFrame(animationId);
@@ -473,20 +459,17 @@
             document.getElementById('start-screen').classList.remove('hidden');
         }
 
-        // --- Game Loop ---
         function animate() {
             if (isPaused || isGameOver) return;
             
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Draw Ocean
             let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
             grad.addColorStop(0, "#60a5fa");
             grad.addColorStop(1, "#1e3a8a");
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Draw ICEBERG
             if (icebergSize > 0) {
                 ctx.save();
                 ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
@@ -500,7 +483,6 @@
                 ctx.restore();
             }
 
-            // Game Objects
             player.update();
             player.draw();
 
@@ -528,7 +510,6 @@
 
             obstacles = obstacles.filter(o => !o.marked);
 
-            // UI
             document.getElementById('score').innerText = score;
             document.getElementById('lives').innerText = lives;
             document.getElementById('iceberg-hp').innerText = icebergSize + "%";
@@ -537,18 +518,15 @@
             animationId = requestAnimationFrame(animate);
         }
 
-        // --- Input ---
         function handleTap(e) {
             if (e.cancelable) e.preventDefault();
             if (!isPaused && !isGameOver && player) player.swim();
         }
         
-        // Add passive: false to prevent default scrolling
         tapZone.addEventListener('touchstart', handleTap, { passive: false });
         tapZone.addEventListener('mousedown', handleTap);
         window.addEventListener('keydown', (e) => { if (e.code === 'Space') handleTap(e); });
 
-        // --- QUIZ DATABASE ---
         const QUESTIONS = [
             { q: "What do sea turtles mistake plastic bags for?", a: ["Jellyfish", "Seaweed", "Coral", "Other Turtles"], c: 0 },
             { q: "How many seabirds die from plastic every year?", a: ["1 Million", "1 Thousand", "100 Birds", "50 Million"], c: 0 },
@@ -563,22 +541,17 @@
         function triggerQuiz() {
             isPaused = true;
             document.getElementById('quiz-screen').classList.remove('hidden');
-            
             let q = QUESTIONS[Math.floor(Math.random() * QUESTIONS.length)];
             document.getElementById('question-text').innerText = q.q;
             let cont = document.getElementById('options-container');
             cont.innerHTML = "";
-            
             let ops = q.a.map((txt, i) => ({txt, i}));
             ops.sort(() => Math.random() - 0.5);
-
             ops.forEach(opt => {
                 let btn = document.createElement('button');
                 btn.className = "quiz-btn";
                 btn.innerText = opt.txt;
                 let isCorrect = (opt.i === q.c);
-                
-                // Add touchstart to avoid delay on iOS
                 btn.ontouchstart = (e) => { e.preventDefault(); checkAnswer(isCorrect); };
                 btn.onclick = () => checkAnswer(isCorrect);
                 cont.appendChild(btn);
@@ -597,11 +570,9 @@
                 fb.style.color = "#ef4444";
                 lives--;
             }
-
             setTimeout(() => {
                 document.getElementById('quiz-screen').classList.add('hidden');
                 fb.innerText = "";
-                
                 if (lives <= 0) {
                     endGame();
                 } else {
@@ -617,15 +588,12 @@
             document.getElementById('game-over-screen').classList.remove('hidden');
             document.getElementById('final-score').innerText = score;
             document.getElementById('iceberg-status').innerText = `Iceberg Remaining: ${icebergSize}%`;
-            
             let rank = "Litterbug 🗑️";
             if (score > 100) rank = "Eco Warrior 🛡️";
             if (score > 300) rank = "Ocean Hero 🧜";
             if (icebergSize === 0) rank = "LEGENDARY SAVIOR 👑";
-            
             document.getElementById('rank-text').innerText = "Rank: " + rank;
         }
-
     </script>
 </body>
 </html>
