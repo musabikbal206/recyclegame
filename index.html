@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ripple's Reef Rescue</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap');
+
+        :root {
+            --ocean-dark: #1e3a8a;
+            --ocean-light: #3b82f6;
+            --sand: #fde047;
+            --turtle-green: #22c55e;
+            --danger: #ef4444;
+            --text-main: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; -webkit-user-select: none; }
+
+        body {
+            background-color: #0f172a;
+            font-family: 'Nunito', sans-serif;
+            overflow: hidden; /* Prevent scrolling */
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            height: 100vh;
+            max-height: 600px;
+            background: linear-gradient(to bottom, #60a5fa, #1e3a8a);
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* --- Canvas --- */
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* --- UI Overlays --- */
+        .ui-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .hidden { display: none !important; }
+
+        h1 { font-family: 'Fredoka One', cursive; font-size: 3rem; color: var(--sand); text-shadow: 2px 2px 0px #000; margin-bottom: 1rem; }
+        h2 { font-family: 'Fredoka One', cursive; font-size: 2rem; color: #fff; margin-bottom: 1rem; }
+        p { font-size: 1.2rem; margin-bottom: 2rem; max-width: 600px; line-height: 1.5; }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background: var(--turtle-green);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-family: 'Fredoka One', cursive;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #15803d;
+            transition: transform 0.1s;
+            min-width: 120px;
+        }
+        .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #15803d; }
+        
+        .btn-easy { background: #22c55e; box-shadow: 0 6px 0 #15803d; }
+        .btn-med { background: #f59e0b; box-shadow: 0 6px 0 #b45309; }
+        .btn-hard { background: #ef4444; box-shadow: 0 6px 0 #b91c1c; }
+        
+        .btn-alt { background: var(--ocean-light); box-shadow: 0 6px 0 #1d4ed8; }
+
+        /* --- HUD --- */
+        #hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .stat-box {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            padding: 8px 15px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        /* --- Quiz Modal --- */
+        #quiz-modal {
+            background: white;
+            color: #1e293b;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border: 4px solid var(--danger);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .quiz-question { font-size: 1.2rem; font-weight: bold; margin-bottom: 1.5rem; }
+        .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+        .quiz-btn {
+            background: #f1f5f9;
+            border: 2px solid #cbd5e1;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        .quiz-btn:hover { background: #e2e8f0; transform: translateX(5px); }
+        
+        .quiz-feedback {
+            margin-top: 10px;
+            font-weight: bold;
+            height: 20px;
+        }
+
+        /* --- Mobile Controls Hint --- */
+        #mobile-hint {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255,255,255,0.5);
+            font-size: 1rem;
+            font-weight: bold;
+            pointer-events: none;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.3; }
+        }
+
+        /* Media Queries for better mobile sizing */
+        @media (max-width: 600px) {
+            h1 { font-size: 2.2rem; }
+            h2 { font-size: 1.5rem; }
+            p { font-size: 1rem; }
+            .btn { padding: 12px 20px; font-size: 1rem; }
+            .stat-box { font-size: 0.9rem; padding: 5px 10px; }
+            #quiz-modal { padding: 1.5rem; }
+            .quiz-question { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- HUD -->
+        <div id="hud" class="hidden">
+            <div class="stat-box">🐢 Lives: <span id="lives">3</span></div>
+            <div class="stat-box">⭐ Score: <span id="score">0</span></div>
+            <div class="stat-box" style="color: #fde047;">🧊 Iceberg: <span id="iceberg-hp">100%</span></div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="ui-screen">
+            <h1>Ripple's Reef Rescue</h1>
+            <p>Help <strong>Ripple</strong> survive the plastic!</p>
+            <p style="font-size: 0.9rem; margin-bottom: 1.5rem;">
+                Avoid 🥡 Bags, 🥤 Straws & 🍾 Bottles.<br>
+                Eat 🪼 Jellyfish for points!<br>
+                If you crash, answer a quiz to recycle! ♻️
+            </p>
+            
+            <p style="margin-bottom: 0.5rem; font-weight: bold;">Select Difficulty:</p>
+            <div class="btn-group">
+                <button class="btn btn-easy" onclick="startGame('easy')">EASY</button>
+                <button class="btn btn-med" onclick="startGame('medium')">MEDIUM</button>
+                <button class="btn btn-hard" onclick="startGame('hard')">HARD</button>
+            </div>
+        </div>
+
+        <!-- Quiz Screen (Hidden) -->
+        <div id="quiz-screen" class="ui-screen hidden">
+            <div id="quiz-modal">
+                <h2 style="color:var(--danger); font-size:1.5rem; margin-bottom:0.5rem;">⚠️ TRASH COLLISION! ⚠️</h2>
+                <p style="color:#64748b; font-size:0.9rem; margin-bottom:1rem;">Recycle this item to survive!</p>
+                <div id="question-text" class="quiz-question">Question goes here...</div>
+                <div id="options-container" class="quiz-options">
+                    <!-- Buttons injected via JS -->
+                </div>
+                <div id="quiz-feedback" class="quiz-feedback"></div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="ui-screen hidden">
+            <h1>Oh No! 😢</h1>
+            <p>Ripple got stuck in the Plastic Iceberg.</p>
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                <h2>Final Score: <span id="final-score">0</span></h2>
+                <p id="rank-text" style="font-weight:bold; color:var(--sand);">Rank: Litterbug</p>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-easy" onclick="resetGame('easy')">RETRY EASY</button>
+                <button class="btn btn-med" onclick="resetGame('medium')">RETRY MEDIUM</button>
+            </div>
+            <button class="btn btn-alt" style="margin-top:10px; font-size: 0.9rem; padding: 10px 20px;" onclick="goToMenu()">MAIN MENU</button>
+        </div>
+
+        <div id="mobile-hint" class="hidden">TAP SCREEN TO SWIM</div>
+    </div>
+
+    <script>
+        /** * GAME ENGINE & LOGIC */
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let animationId;
+        let lastTime = 0;
+        
+        // Configurable Variables
+        let gameSpeed = 2; 
+        let spawnRate = 120; // Frames between obstacles
+        let score = 0;
+        let lives = 3;
+        let icebergSize = 100;
+        let isPaused = false;
+        let isGameOver = false;
+        let currentDifficulty = 'medium';
+
+        // Difficulty Settings
+        const DIFFICULTY_SETTINGS = {
+            easy: { speed: 2, lives: 5, spawnRate: 140, gravity: 0.35, jump: -6 },
+            medium: { speed: 3.5, lives: 3, spawnRate: 110, gravity: 0.4, jump: -7 },
+            hard: { speed: 5.5, lives: 1, spawnRate: 80, gravity: 0.5, jump: -8 }
+        };
+
+        // --- Resize Logic ---
+        function resize() {
+            canvas.width = document.getElementById('game-container').offsetWidth;
+            canvas.height = document.getElementById('game-container').offsetHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // --- Sprites ---
+        const SPRITES = {
+            turtle: "🐢", jellyfish: "🪼", bag: "🥡", straw: "🥤", bottle: "🍾", powerup: "🧴"
+        };
+
+        // --- Audio (Synthesized) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'jump') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(500, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime); // Lower volume
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'coin') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.2);
+            } else if (type === 'crash') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            }
+        }
+
+        // --- Quiz Data ---
+        const QUIZ_DATA = [
+            { q: "What do sea turtles mistake plastic bags for?", a: ["Jellyfish", "Coral", "Other Turtles"], correct: 0 },
+            { q: "How many seabirds die from plastic every year?", a: ["1 Thousand", "1 Million", "1 Billion"], correct: 1 },
+            { q: "What is the 'Plastic Iceberg'?", a: ["Real Ice", "A Boat", "A giant pile of trash"], correct: 2 },
+            { q: "What is a better alternative to plastic straws?", a: ["Bamboo/Paper", "More Plastic", "Nothing"], correct: 0 },
+            { q: "Who taught Elara about microplastics?", a: ["Her Mom", "Mr. Lin", "Ripple"], correct: 1 },
+            { q: "Microplastics are...", a: ["Huge bottles", "Tiny broken pieces", "Good for fish"], correct: 1 },
+            { q: "How long does a plastic bag take to decompose?", a: ["1 day", "Forever (Microplastics)", "10 years"], correct: 1 },
+            { q: "What % of baby turtles have plastic in them?", a: ["10%", "50%", "100%"], correct: 2 }
+        ];
+
+        // --- Game Objects ---
+        class Turtle {
+            constructor() {
+                this.width = 40;
+                this.height = 30;
+                this.x = canvas.width * 0.1; // 10% from left
+                this.y = canvas.height / 2;
+                this.dy = 0; 
+                this.gravity = DIFFICULTY_SETTINGS[currentDifficulty].gravity;
+                this.jumpStrength = DIFFICULTY_SETTINGS[currentDifficulty].jump;
+                this.invincible = false;
+                this.angle = 0;
+            }
+
+            update() {
+                this.dy += this.gravity;
+                this.y += this.dy;
+
+                // Floor/Ceiling collision
+                if (this.y + this.height > canvas.height) {
+                    this.y = canvas.height - this.height;
+                    this.dy = 0;
+                }
+                if (this.y < 0) {
+                    this.y = 0;
+                    this.dy = 0;
+                }
+
+                // Rotation
+                this.angle = Math.min(Math.max(this.dy * 4, -25), 25);
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x + this.width/2, this.y + this.height/2);
+                ctx.rotate(this.angle * Math.PI / 180);
+                ctx.font = "40px Arial";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.globalAlpha = this.invincible && Math.floor(Date.now() / 100) % 2 === 0 ? 0.5 : 1;
+                ctx.fillText(SPRITES.turtle, 0, 0);
+                ctx.restore();
+            }
+
+            swim() {
+                this.dy = this.jumpStrength;
+                playSound('jump');
+            }
+        }
+
+        class Obstacle {
+            constructor() {
+                this.x = canvas.width + 50;
+                this.y = Math.random() * (canvas.height - 60) + 30; // Avoid extreme edges
+                this.speed = gameSpeed;
+                this.markedForDeletion = false;
+                
+                const rand = Math.random();
+                if (rand < 0.6) {
+                    this.type = 'trash';
+                    this.subtype = Math.random() > 0.5 ? 'bag' : (Math.random() > 0.5 ? 'straw' : 'bottle');
+                    this.size = 40;
+                } else if (rand < 0.9) {
+                    this.type = 'jellyfish';
+                    this.size = 35;
+                } else {
+                    this.type = 'powerup';
+                    this.size = 35;
+                }
+            }
+
+            update() {
+                this.x -= this.speed;
+                if (this.x < -50) this.markedForDeletion = true;
+                this.angle += 0.05; 
+            }
+
+            draw() {
+                ctx.font = `${this.size}px Arial`;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                let icon = '';
+                if (this.type === 'trash') {
+                    if (this.subtype === 'bag') icon = SPRITES.bag;
+                    else if (this.subtype === 'straw') icon = SPRITES.straw;
+                    else icon = SPRITES.bottle;
+                } else if (this.type === 'jellyfish') {
+                    icon = SPRITES.jellyfish;
+                } else {
+                    icon = SPRITES.powerup;
+                }
+
+                const bobY = Math.sin(Date.now()/300 + this.x) * 5;
+                ctx.fillText(icon, this.x, this.y + bobY);
+            }
+        }
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 5 + 2;
+                this.speedX = Math.random() * 2 - 1;
+                this.speedY = Math.random() * 2 - 1;
+                this.color = `rgba(255, 255, 255, ${Math.random()})`;
+                this.markedForDeletion = false;
+                this.life = 60;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY - 1; 
+                this.life--;
+                if(this.life <= 0) this.markedForDeletion = true;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // --- Global State ---
+        let player;
+        let obstacles = [];
+        let particles = [];
+        let frame = 0;
+
+        // --- Input Handling ---
+        function handleInput(e) {
+            // Prevent default zooming/scrolling on mobile
+            if (e.type === 'touchstart' || e.type === 'mousedown') {
+                e.preventDefault();
+            }
+            if (e.type === 'keydown' && e.code !== 'Space') return;
+            
+            if (isPaused || isGameOver) return;
+            if (player) player.swim();
+        }
+        window.addEventListener('keydown', handleInput);
+        window.addEventListener('touchstart', handleInput, {passive: false});
+        window.addEventListener('mousedown', handleInput);
+
+        // --- Game Loop ---
+        function animate(timestamp) {
+            if (isPaused) return; 
+
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Background
+            let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, "#60a5fa");
+            gradient.addColorStop(1, "#1e3a8a");
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Iceberg Background
+            ctx.save();
+            ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+            ctx.beginPath();
+            ctx.moveTo(canvas.width, canvas.height);
+            ctx.lineTo(0, canvas.height);
+            ctx.lineTo(0, canvas.height - (icebergSize * 3)); 
+            ctx.lineTo(canvas.width, canvas.height - (icebergSize * 2));
+            ctx.fill();
+            ctx.restore();
+
+            // Player
+            player.update();
+            player.draw();
+
+            // Obstacles
+            if (frame % spawnRate === 0) {
+                obstacles.push(new Obstacle());
+                // Mild speed increase over time capped at +2 of base
+                if (gameSpeed < DIFFICULTY_SETTINGS[currentDifficulty].speed + 2) {
+                    gameSpeed += 0.01;
+                }
+            }
+
+            [...obstacles].forEach(obj => {
+                obj.update();
+                obj.draw();
+                
+                // Collision
+                // Adjusted hitbox to be smaller than sprite for fairness
+                const dist = Math.hypot(player.x - obj.x, player.y - obj.y);
+                if (dist < 35) {
+                    if (obj.type === 'trash') {
+                        if (!player.invincible) {
+                            triggerCollision(obj);
+                        }
+                    } else if (obj.type === 'jellyfish') {
+                        score += 10;
+                        createParticles(obj.x, obj.y);
+                        playSound('coin');
+                        obj.markedForDeletion = true;
+                    } else if (obj.type === 'powerup') {
+                        score += 50;
+                        icebergSize = Math.max(0, icebergSize - 10);
+                        player.invincible = true;
+                        createParticles(obj.x, obj.y);
+                        setTimeout(() => player.invincible = false, 5000); 
+                        obj.markedForDeletion = true;
+                    }
+                }
+            });
+
+            // Particles
+            [...particles].forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            obstacles = obstacles.filter(o => !o.markedForDeletion);
+            particles = particles.filter(p => !p.markedForDeletion);
+
+            // HUD
+            document.getElementById('score').innerText = score;
+            document.getElementById('lives').innerText = lives;
+            document.getElementById('iceberg-hp').innerText = icebergSize + "%";
+
+            frame++;
+            if (!isGameOver) animationId = requestAnimationFrame(animate);
+        }
+
+        // --- Logic ---
+        function triggerCollision(obstacle) {
+            playSound('crash');
+            obstacle.markedForDeletion = true; 
+            isPaused = true;
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            
+            const q = QUIZ_DATA[Math.floor(Math.random() * QUIZ_DATA.length)];
+            document.getElementById('question-text').innerText = q.q;
+            
+            const btnContainer = document.getElementById('options-container');
+            btnContainer.innerHTML = ''; 
+            
+            q.a.forEach((opt, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'quiz-btn';
+                btn.innerText = opt;
+                btn.onclick = () => handleQuizAnswer(idx === q.correct);
+                btnContainer.appendChild(btn);
+            });
+        }
+
+        function handleQuizAnswer(isCorrect) {
+            const fb = document.getElementById('quiz-feedback');
+            
+            if (isCorrect) {
+                fb.innerText = "CORRECT! Item Recycled! ♻️";
+                fb.style.color = "green";
+                score += 20;
+                icebergSize = Math.max(0, icebergSize - 5);
+                setTimeout(() => {
+                    document.getElementById('quiz-screen').classList.add('hidden');
+                    fb.innerText = "";
+                    isPaused = false;
+                    lastTime = performance.now(); 
+                    requestAnimationFrame(animate);
+                }, 1000);
+            } else {
+                fb.innerText = "WRONG! Ripple lost health. 💔";
+                fb.style.color = "red";
+                lives--;
+                setTimeout(() => {
+                    document.getElementById('quiz-screen').classList.add('hidden');
+                    fb.innerText = "";
+                    
+                    if (lives <= 0) {
+                        endGame();
+                    } else {
+                        isPaused = false;
+                        player.y = canvas.height / 2; 
+                        player.dy = 0;
+                        lastTime = performance.now();
+                        requestAnimationFrame(animate);
+                    }
+                }, 1000);
+            }
+        }
+
+        function createParticles(x, y) {
+            for(let i=0; i<10; i++) {
+                particles.push(new Particle(x, y));
+            }
+        }
+
+        function startGame(difficulty) {
+            currentDifficulty = difficulty;
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('hud').classList.remove('hidden');
+            document.getElementById('mobile-hint').classList.remove('hidden');
+            
+            resetVariables();
+            resize();
+            animate(0);
+        }
+
+        function resetGame(difficulty) {
+            document.getElementById('game-over-screen').classList.add('hidden');
+            startGame(difficulty);
+        }
+
+        function goToMenu() {
+            document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('hud').classList.add('hidden');
+            document.getElementById('mobile-hint').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+            isGameOver = true;
+        }
+
+        function resetVariables() {
+            const settings = DIFFICULTY_SETTINGS[currentDifficulty];
+            
+            gameSpeed = settings.speed;
+            spawnRate = settings.spawnRate;
+            lives = settings.lives;
+            
+            player = new Turtle();
+            obstacles = [];
+            particles = [];
+            score = 0;
+            icebergSize = 100;
+            isPaused = false;
+            isGameOver = false;
+            frame = 0;
+        }
+
+        function endGame() {
+            isGameOver = true;
+            document.getElementById('game-over-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+            
+            let rank = "Litterbug 🗑️";
+            if (score > 100) rank = "Beach Cleaner 🧹";
+            if (score > 300) rank = "Eco Warrior 🛡️";
+            if (score > 500) rank = "Ocean Guardian 🧜";
+            document.getElementById('rank-text').innerText = "Rank: " + rank;
+        }
+
+    </script>
+</body>
+</html>
