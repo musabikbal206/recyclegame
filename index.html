@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Ripple's Reef Rescue</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap');
@@ -16,7 +16,7 @@
             --text-main: #ffffff;
         }
 
-        /* CRITICAL FOR MOBILE: Prevents default browser gestures like pull-to-refresh or zoom */
+        /* CRITICAL FOR MOBILE: Prevents gestures and selection */
         * { 
             margin: 0; 
             padding: 0; 
@@ -31,7 +31,9 @@
             background-color: #0f172a;
             font-family: 'Nunito', sans-serif;
             overflow: hidden;
+            /* Use dvh for dynamic viewport height (fixes iOS address bar issue) */
             height: 100vh;
+            height: 100dvh;
             width: 100vw;
             display: flex;
             justify-content: center;
@@ -97,14 +99,14 @@
         .btn {
             color: white;
             border: none;
-            padding: 12px 20px;
-            font-size: 1rem;
+            padding: 15px 25px; /* Larger touch target */
+            font-size: 1.1rem;
             font-family: 'Fredoka One', cursive;
             border-radius: 50px;
             cursor: pointer;
             box-shadow: 0 4px 0 rgba(0,0,0,0.2);
             transition: transform 0.1s;
-            min-width: 90px;
+            min-width: 100px;
         }
         .btn:active { transform: translateY(4px); box-shadow: none; }
         
@@ -116,7 +118,7 @@
         /* --- HUD --- */
         #hud {
             position: absolute;
-            top: 10px;
+            top: env(safe-area-inset-top, 10px); /* iOS Safe Area */
             left: 10px;
             right: 10px;
             display: flex;
@@ -126,7 +128,7 @@
         }
         .stat-box {
             background: rgba(0, 0, 0, 0.5);
-            padding: 6px 12px;
+            padding: 8px 14px;
             border-radius: 15px;
             color: white;
             font-weight: bold;
@@ -164,7 +166,7 @@
         
         .quiz-options { 
             display: grid; 
-            grid-template-columns: 1fr 1fr; /* 2 columns for 4 options */
+            grid-template-columns: 1fr 1fr; 
             gap: 10px; 
         }
         
@@ -181,6 +183,8 @@
             align-items: center;
             justify-content: center;
             min-height: 50px;
+            /* Prevent double-tap zoom on buttons */
+            touch-action: manipulation; 
         }
         .quiz-btn:active { background: #cbd5e1; }
         .quiz-feedback { margin-top: 15px; font-weight: bold; height: 20px; color: var(--danger); }
@@ -208,9 +212,8 @@
         
         @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
 
-        /* Small screen adjustments */
         @media (max-width: 380px) {
-            .quiz-options { grid-template-columns: 1fr; } /* Stack options on very small screens */
+            .quiz-options { grid-template-columns: 1fr; }
             h1 { font-size: 1.8rem; }
         }
     </style>
@@ -238,9 +241,10 @@
             </p>
             <p style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 10px;">Select Difficulty:</p>
             <div class="btn-group">
-                <button class="btn btn-easy" onclick="initGame('easy')">EASY</button>
-                <button class="btn btn-med" onclick="initGame('medium')">MEDIUM</button>
-                <button class="btn btn-hard" onclick="initGame('hard')">HARD</button>
+                <!-- Using ontouchstart for immediate response on iPhone -->
+                <button class="btn btn-easy" ontouchstart="initGame('easy')" onclick="initGame('easy')">EASY</button>
+                <button class="btn btn-med" ontouchstart="initGame('medium')" onclick="initGame('medium')">MEDIUM</button>
+                <button class="btn btn-hard" ontouchstart="initGame('hard')" onclick="initGame('hard')">HARD</button>
             </div>
         </div>
 
@@ -263,7 +267,7 @@
                 <p id="iceberg-status" style="margin-bottom: 5px; color: #bae6fd;">Iceberg Remaining: 100%</p>
                 <p id="rank-text" style="font-weight:bold; color:var(--sand); margin-bottom:0;">Rank: Litterbug</p>
             </div>
-            <button class="btn btn-alt" onclick="showStartScreen()">MAIN MENU</button>
+            <button class="btn btn-alt" ontouchstart="showStartScreen()" onclick="showStartScreen()">MAIN MENU</button>
         </div>
 
         <div id="mobile-hint" class="hidden">TAP TO SWIM 👆</div>
@@ -275,12 +279,18 @@
         const ctx = canvas.getContext('2d');
         const tapZone = document.getElementById('tap-zone');
         
-        // --- Mobile Audio Fix ---
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        let audioCtx = new AudioContext();
+        // --- Audio Context (Lazy Load for iOS) ---
+        let audioCtx = null;
         
-        function unlockAudio() {
-            if (audioCtx.state === 'suspended') {
+        function initAudio() {
+            if (!audioCtx) {
+                // Initialize ONLY on user gesture
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    audioCtx = new AudioContext();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
         }
@@ -290,7 +300,7 @@
         let frames = 0;
         let score = 0;
         let lives = 3;
-        let icebergSize = 100; // 0 to 100
+        let icebergSize = 100; 
         let gameSpeed = 2;
         let isPaused = false;
         let isGameOver = false;
@@ -311,41 +321,47 @@
             hard: { speed: 5.5, spawnRate: 90, gravity: 0.5, jump: -9 }
         };
 
-        // --- Sprites ---
         const SPRITES = { t: "🐢", j: "🪼", b: "🥡", s: "🥤", bo: "🍾", p: "🧴" };
 
         // --- Audio Logic ---
         function playTone(type) {
             if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            const now = audioCtx.currentTime;
-            
-            if (type === 'jump') {
-                osc.frequency.setValueAtTime(300, now);
-                osc.frequency.linearRampToValueAtTime(500, now + 0.1);
-                gain.gain.setValueAtTime(0.1, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.1);
-                osc.start(now);
-                osc.stop(now + 0.1);
-            } else if (type === 'coin') {
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(600, now);
-                osc.frequency.setValueAtTime(900, now + 0.1);
-                gain.gain.setValueAtTime(0.05, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.2);
-                osc.start(now);
-                osc.stop(now + 0.2);
-            } else if (type === 'crash') {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(150, now);
-                osc.frequency.exponentialRampToValueAtTime(50, now + 0.3);
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.3);
-                osc.start(now);
-                osc.stop(now + 0.3);
+            // Guard against audio playing before context is ready
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+                
+                if (type === 'jump') {
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.linearRampToValueAtTime(500, now + 0.1);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                } else if (type === 'coin') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.setValueAtTime(900, now + 0.1);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'crash') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.exponentialRampToValueAtTime(50, now + 0.3);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                }
+            } catch (e) {
+                console.log("Audio play failed (harmless on mobile if muted):", e);
             }
         }
 
@@ -362,7 +378,6 @@
                 this.dy += this.settings.gravity;
                 this.y += this.dy;
 
-                // Boundaries
                 if (this.y + this.size/2 > canvas.height) {
                     this.y = canvas.height - this.size/2;
                     this.dy = 0;
@@ -425,12 +440,16 @@
         let obstacles = [];
 
         function initGame(difficulty) {
-            unlockAudio();
+            initAudio(); // KEY for iOS
+            
+            // Prevent double-firing if both touch/click register
+            if (document.getElementById('hud').classList.contains('hidden') === false) return;
+
             currentDiff = difficulty;
             gameSpeed = SETTINGS[difficulty].speed;
             lives = 3;
             score = 0;
-            icebergSize = 100; // Reset Iceberg
+            icebergSize = 100;
             frames = 0;
             obstacles = [];
             player = new Turtle();
@@ -443,6 +462,8 @@
             document.getElementById('mobile-hint').classList.remove('hidden');
             
             setTimeout(() => document.getElementById('mobile-hint').classList.add('hidden'), 2500);
+            
+            if (animationId) cancelAnimationFrame(animationId);
             animate();
         }
 
@@ -458,32 +479,28 @@
             
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // 1. Draw Ocean
+            // Draw Ocean
             let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
             grad.addColorStop(0, "#60a5fa");
             grad.addColorStop(1, "#1e3a8a");
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // 2. Draw ICEBERG (Dynamic Size)
+            // Draw ICEBERG
             if (icebergSize > 0) {
                 ctx.save();
-                ctx.fillStyle = "rgba(255, 255, 255, 0.2)"; // Semi-transparent white
+                ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
                 ctx.beginPath();
-                // A jagged polygon shape at the bottom
                 ctx.moveTo(0, canvas.height);
-                // Left peak
                 ctx.lineTo(0, canvas.height - (canvas.height * (icebergSize/150))); 
-                // Middle dip
                 ctx.lineTo(canvas.width/2, canvas.height - (canvas.height * (icebergSize/200))); 
-                // Right peak
                 ctx.lineTo(canvas.width, canvas.height - (canvas.height * (icebergSize/120))); 
                 ctx.lineTo(canvas.width, canvas.height);
                 ctx.fill();
                 ctx.restore();
             }
 
-            // 3. Game Objects
+            // Game Objects
             player.update();
             player.draw();
 
@@ -495,7 +512,6 @@
                 obs.update();
                 obs.draw();
 
-                // Collision
                 let dist = Math.hypot(player.x - obs.x, player.y - obs.y);
                 if (dist < 45) {
                     if (obs.type === 'food') {
@@ -512,7 +528,7 @@
 
             obstacles = obstacles.filter(o => !o.marked);
 
-            // UI Update
+            // UI
             document.getElementById('score').innerText = score;
             document.getElementById('lives').innerText = lives;
             document.getElementById('iceberg-hp').innerText = icebergSize + "%";
@@ -524,81 +540,45 @@
         // --- Input ---
         function handleTap(e) {
             if (e.cancelable) e.preventDefault();
-            if (!isPaused && !isGameOver) player.swim();
+            if (!isPaused && !isGameOver && player) player.swim();
         }
+        
+        // Add passive: false to prevent default scrolling
         tapZone.addEventListener('touchstart', handleTap, { passive: false });
         tapZone.addEventListener('mousedown', handleTap);
         window.addEventListener('keydown', (e) => { if (e.code === 'Space') handleTap(e); });
 
-        // --- 4-OPTION QUIZ DATABASE ---
-        // Sources: Slides & Story provided in prompt history
+        // --- QUIZ DATABASE ---
         const QUESTIONS = [
-            {
-                q: "What do sea turtles mistake plastic bags for?", 
-                a: ["Jellyfish", "Seaweed", "Coral", "Other Turtles"], 
-                c: 0
-            },
-            {
-                q: "How many seabirds die from plastic every year?", 
-                a: ["1 Million", "1 Thousand", "100 Birds", "50 Million"], 
-                c: 0
-            },
-            {
-                q: "Who taught Elara about microplastics?", 
-                a: ["Mr. Lin", "Her Mom", "Her Teacher", "Ripple"], 
-                c: 0
-            },
-            {
-                q: "What is a sustainable alternative to plastic straws?", 
-                a: ["Bamboo", "Styrofoam", "Rubber", "More Plastic"], 
-                c: 0
-            },
-            {
-                q: "How long does a plastic bag take to decompose?", 
-                a: ["Forever", "1 Day", "1 Week", "1 Month"], 
-                c: 0
-            },
-            {
-                q: "How many pieces of plastic are in the ocean?", 
-                a: ["5.25 Trillion", "1 Million", "100", "Zero"], 
-                c: 0
-            },
-            {
-                q: "What percentage of baby turtles have plastic in them?", 
-                a: ["100%", "10%", "50%", "0%"], 
-                c: 0
-            },
-            {
-                q: "What is the 'Plastic Iceberg' made of?", 
-                a: ["Trash", "Real Ice", "Sand", "Boats"], 
-                c: 0
-            }
+            { q: "What do sea turtles mistake plastic bags for?", a: ["Jellyfish", "Seaweed", "Coral", "Other Turtles"], c: 0 },
+            { q: "How many seabirds die from plastic every year?", a: ["1 Million", "1 Thousand", "100 Birds", "50 Million"], c: 0 },
+            { q: "Who taught Elara about microplastics?", a: ["Mr. Lin", "Her Mom", "Her Teacher", "Ripple"], c: 0 },
+            { q: "What is a sustainable alternative to plastic straws?", a: ["Bamboo", "Styrofoam", "Rubber", "More Plastic"], c: 0 },
+            { q: "How long does a plastic bag take to decompose?", a: ["Forever", "1 Day", "1 Week", "1 Month"], c: 0 },
+            { q: "How many pieces of plastic are in the ocean?", a: ["5.25 Trillion", "1 Million", "100", "Zero"], c: 0 },
+            { q: "What percentage of baby turtles have plastic in them?", a: ["100%", "10%", "50%", "0%"], c: 0 },
+            { q: "What is the 'Plastic Iceberg' made of?", a: ["Trash", "Real Ice", "Sand", "Boats"], c: 0 }
         ];
 
         function triggerQuiz() {
             isPaused = true;
             document.getElementById('quiz-screen').classList.remove('hidden');
             
-            // Get random question
             let q = QUESTIONS[Math.floor(Math.random() * QUESTIONS.length)];
-            
             document.getElementById('question-text').innerText = q.q;
             let cont = document.getElementById('options-container');
             cont.innerHTML = "";
             
-            // Create a shuffled copy of options with original indices to track correct answer
             let ops = q.a.map((txt, i) => ({txt, i}));
-            // Shuffle logic
             ops.sort(() => Math.random() - 0.5);
 
             ops.forEach(opt => {
                 let btn = document.createElement('button');
                 btn.className = "quiz-btn";
                 btn.innerText = opt.txt;
-                
-                // Check if this shuffled button corresponds to the correct index (q.c)
                 let isCorrect = (opt.i === q.c);
                 
+                // Add touchstart to avoid delay on iOS
                 btn.ontouchstart = (e) => { e.preventDefault(); checkAnswer(isCorrect); };
                 btn.onclick = () => checkAnswer(isCorrect);
                 cont.appendChild(btn);
@@ -611,7 +591,7 @@
                 fb.innerText = "CORRECT! Iceberg Shrinks! 🧊⬇️";
                 fb.style.color = "#22c55e";
                 score += 20;
-                icebergSize = Math.max(0, icebergSize - 15); // SHRINK ICEBERG
+                icebergSize = Math.max(0, icebergSize - 15);
             } else {
                 fb.innerText = "WRONG! OUCH! 💔";
                 fb.style.color = "#ef4444";
@@ -624,11 +604,6 @@
                 
                 if (lives <= 0) {
                     endGame();
-                } else if (icebergSize === 0 && score > 100) {
-                    // Bonus condition: If iceberg is gone, maybe give huge bonus? 
-                    // For now just continue game but iceberg is gone visually.
-                    isPaused = false;
-                    animate();
                 } else {
                     isPaused = false;
                     animate();
@@ -646,7 +621,7 @@
             let rank = "Litterbug 🗑️";
             if (score > 100) rank = "Eco Warrior 🛡️";
             if (score > 300) rank = "Ocean Hero 🧜";
-            if (icebergSize === 0) rank = "LEGENDARY SAVIOR 👑"; // Secret rank
+            if (icebergSize === 0) rank = "LEGENDARY SAVIOR 👑";
             
             document.getElementById('rank-text').innerText = "Rank: " + rank;
         }
